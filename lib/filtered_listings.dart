@@ -5,7 +5,7 @@ import 'dart:io';
 // App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -25,7 +25,6 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FilteredListingsPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
   final String filterCategory;
   final String? subfilterCategory;
   final List<Map<String, dynamic>> listings;
@@ -33,7 +32,6 @@ class FilteredListingsPage extends StatefulWidget {
   final Function(String?) onSubfilterChange;
 
   const FilteredListingsPage({
-    required this.analyticsService,
     required this.filterCategory,
     this.subfilterCategory,
     required this.onSubfilterChange,
@@ -108,7 +106,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm.isEmpty) return;
     _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
-      widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'listings');
+      context.read<AnalyticsService>().logSearch(trimmedSearchTerm, searchArea: 'listings');
     });
   }
 
@@ -250,7 +248,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
-    widget.analyticsService.logButtonTapped('sorting_dropdown_option');
+    context.read<AnalyticsService>().logButtonTapped('sorting_dropdown_option');
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.nearest && currentLatLng == null) {
         Fluttertoast.showToast(
@@ -263,7 +261,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           timeInSecForIosWeb: 4,
         );
       } else {
-        widget.analyticsService.logPreferenceSet('sorting_method', selectedValue.name);
+        context.read<AnalyticsService>().logPreferenceSet('sorting_method', selectedValue.name);
         setState(() {
           detailsVisibleIndex = null;
           preferredSortingMethod = selectedValue;
@@ -284,8 +282,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
     detailsVisibleIndex = null;
-    widget.analyticsService.logButtonTapped('listings_category_filter');
-    widget.analyticsService.logPreferenceSet('listings_category', selectedValue ?? 'all');
+    context.read<AnalyticsService>().logButtonTapped('listings_category_filter');
+    context.read<AnalyticsService>().logPreferenceSet('listings_category', selectedValue ?? 'all');
     widget.onSubfilterChange.call(selectedValue);
   }
 
@@ -352,7 +350,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
         onTabSelected: widget.onTabSelected,
         allowBack: false,
-        analyticsService: widget.analyticsService,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -368,7 +365,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   : ElevatedButton.icon(
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        context.read<AnalyticsService>().logButtonTapped('refresh_listings_from_error');
                         refreshListings();
                       },
                       icon: const Icon(Icons.refresh),
@@ -439,10 +436,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canScrollToNow) {
-              showMiniPopup(context, nowOrSoonIconKey, '‘Go to now’ is only available when showing just events or performances', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+              showMiniPopup(context, nowOrSoonIconKey, '‘Go to now’ is only available when showing just events or performances', fgColour: colorScheme.error);
               return;
             }
-            widget.analyticsService.logButtonTapped('listings_scroll_to_now');
+            context.read<AnalyticsService>().logButtonTapped('listings_scroll_to_now');
             if (isItEventDay(_dateTimeProvider)) {
               if (firstNextListingIndex < 0) {
                 // we may not be on Sort by Time, or the Fair may have recently started
@@ -481,7 +478,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 );
               }
             } else {
-              showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+              showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', fgColour: colorScheme.error);
             }
           },
           icon: Icon(
@@ -497,20 +494,20 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canTogglePastListings) {
-              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when showing just events or performances', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when showing just events or performances', fgColour: colorScheme.error);
               return;
             }
-            widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_hide_past_toggle');
             if (isItEventDay(_dateTimeProvider)) {
               setState(() {
                 _hidePastListings = !_hidePastListings;
-                widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
+                context.read<AnalyticsService>().logPreferenceSet('listings_hide_past', _hidePastListings.toString());
                 numberOfVisibleListings = -1;
                 firstVisibleIndex = null;
               });
               showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
             } else {
-              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error);
             }
           },
           icon: Icon(
@@ -527,7 +524,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           color: colorScheme.onSecondary,
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('listings_search_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_search_toggle');
             setState(() {
               detailsVisibleIndex = null;
               _isSearching = !_isSearching;
@@ -588,7 +585,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
                                   detailsVisibleIndex = null;
-                                  widget.analyticsService.logButtonTapped('search_close');
+                                  context.read<AnalyticsService>().logButtonTapped('search_close');
                                   _searchAnalyticsTimer?.cancel();
                                   setState(() {
                                     if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
@@ -650,7 +647,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   ? null
                                   : () {
                                       final listing = filteredListings[detailsVisibleIndex!];
-                                      widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
+                                      context.read<AnalyticsService>().logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
                                       detailsVisibleIndex = null;
                                       HapticFeedback.lightImpact();
                                       setState(() {});
@@ -685,7 +682,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           child: GestureDetector(
                                             onTap: () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
+                                              context.read<AnalyticsService>().logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
                                               toggleDetailsRow(index);
                                             },
                                             child: SpecificListingInfoSheet(
@@ -719,7 +716,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                                       onTabSelected: (_) => {},
                                                       destinationId: listing['id'],
                                                       destinationLatLng: destinationLatLng,
-                                                      analyticsService: widget.analyticsService,
                                                     )
                                                   )
                                                 );
@@ -729,7 +725,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                                 await toggleListingAlert(listing['id'], alertNoticePeriod, context);
                                                 setState(() { });
                                               },
-                                              analyticsService: widget.analyticsService,
                                               inDialog: false,
                                               colorScheme: colorScheme,
                                             )
@@ -830,7 +825,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('clearCloseSearch_listings');
                                           setState(() {
                                             _searchAnalyticsTimer?.cancel();
                                             _searchQuery = '';
@@ -847,7 +842,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('switchOffFilter_listings');
                                           widget.onSubfilterChange(null);
                                         },
                                         icon: const Icon(Icons.filter_alt, size: 28),
@@ -859,7 +854,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('switchOffFavourites_listings');
                                           widget.onTabSelected(3); // in future, this could preserve search as well
                                         },
                                         icon: const Icon(Icons.ballot, size: 28),
@@ -878,7 +873,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
           ]);
         }),
-      analyticsService: widget.analyticsService,
     );
   }
 
@@ -923,7 +917,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose how to sort listings',
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -967,7 +961,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {

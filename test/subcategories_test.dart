@@ -4,10 +4,13 @@ import 'dart:convert';
 // App imports
 import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 // Third-party imports
 import 'package:material_ui/material_ui.dart';
@@ -33,7 +36,7 @@ const expectedSubcategories = {
 };
 
 String categoryListingId(String category) =>
-    (26020 + expectedSubcategories.keys.toList().indexOf(category)).toString();
+      (26020 + expectedSubcategories.keys.toList().indexOf(category)).toString();
 
 void main() {
   setUp(() async {
@@ -79,7 +82,8 @@ void main() {
               'performanceDance': 'Dance',
               'performanceOther': 'Other',
               'visitExperience': 'Visit/Experience',
-              'service': 'Service', 
+              'service': 'Service',
+              
             }[entry.key]);
     });
 
@@ -92,18 +96,19 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys.map(categoryListingId), '26104'};
         String? selected;
-        await tester.pumpWithClock(MaterialApp(home: Scaffold(
-          body: StatefulBuilder(builder: (context, setState) {
-            return FilteredListingsPage(
-              filterCategory: page,
-              subfilterCategory: selected,
-              listings: listings,
-              onTabSelected: (_) {},
-              onSubfilterChange: (value) => setState(() => selected = value),
-              analyticsService: FakeAnalyticsService(),
-            );
-          }),
-        )));
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(
+            value: FakeAnalyticsService(),
+            child: MaterialApp(home: Scaffold(
+              body: StatefulBuilder(builder: (context, setState) {
+                return FilteredListingsPage(
+                  filterCategory: page,
+                  subfilterCategory: selected,
+                  listings: listings,
+                  onTabSelected: (_) {},
+                  onSubfilterChange: (value) => setState(() => selected = value),
+                );
+              }),
+            ))));
         await tester.pumpAndSettle();
 
         final menuFinder = find.byKey(const ValueKey('filterdropdown'));
@@ -126,8 +131,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
-        expect(state.filteredListings.map((listing) => listing['id']),
-            unorderedEquals([categoryListingId(entry.key), if (page == 'all') '26030']));
+        expect(state.filteredListings.map((listing) => listing['id']), unorderedEquals([categoryListingId(entry.key), if (page == 'all') '26030']));
         expect(state.isShowingJustPerformance, entry.key.startsWith('performance'));
 
         await tester.tap(menuButtonFinder);

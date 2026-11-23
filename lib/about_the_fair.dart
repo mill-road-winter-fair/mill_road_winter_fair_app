@@ -7,8 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // App imports
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
@@ -100,8 +100,7 @@ TableRow eventRow(ColorScheme colorScheme, String eventTime, String eventTitle, 
 
 
 class AboutTheFairPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
-  const AboutTheFairPage({super.key, required this.analyticsService});
+  const AboutTheFairPage({super.key});
 
   @override
   State<AboutTheFairPage> createState() => _AboutTheFairPageState();
@@ -153,12 +152,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
 
   @override
   void didPush() {
-    widget.analyticsService.setCurrentScreen('AboutPage');
+    context.read<AnalyticsService>().setCurrentScreen('AboutPage');
   }
 
   @override
   void didPopNext() {
-    widget.analyticsService.setCurrentScreen('AboutPage');
+    context.read<AnalyticsService>().setCurrentScreen('AboutPage');
   }
 
   void _onSponsorTap(String name) {
@@ -168,7 +167,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       return;
     }
     HapticFeedback.lightImpact();
-    widget.analyticsService.logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
+    context.read<AnalyticsService>().logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
     context.read<UrlLauncher>().open(Uri.parse(url));
   }
 
@@ -178,7 +177,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       style: style,
       recognizer: TapGestureRecognizer()..onTap = () {
         HapticFeedback.lightImpact();
-        widget.analyticsService.logButtonTapped('directionableLocation_hyperlink');
+        context.read<AnalyticsService>().logButtonTapped('directionableLocation_hyperlink');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -187,7 +186,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
               onTabSelected: (_) => {},
               destinationId: '$aSimpleMarkerId $theLocationCat',
               destinationLatLng: locationLatLng,
-              analyticsService: widget.analyticsService,
             ),
           ),
         );
@@ -236,11 +234,13 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AnalyticsService>().logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('About Mill Road Winter Fair'),
@@ -275,7 +275,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                         recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
-                              widget.analyticsService.logButtonTapped('aboutpage_donating');
+                              context.read<AnalyticsService>().logButtonTapped('aboutpage_donating');
                               context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
                             },
                       ),

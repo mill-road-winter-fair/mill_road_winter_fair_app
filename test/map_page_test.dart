@@ -1,9 +1,10 @@
 // App imports
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:provider/provider.dart';
 
 // Third-party imports
 import 'package:material_ui/material_ui.dart';
@@ -13,8 +14,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
+
+
+class RecordingMapAnalyticsService extends FakeAnalyticsService {
+  final buttons = <String>[];
+  final filters = <(String, bool)>[];
+
+  @override
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    buttons.add(buttonName);
+  }
+
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible) async {
+    filters.add((category, visible));
+  }
+}
 
 void main() {
   // We're on test
@@ -43,7 +61,7 @@ void main() {
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}).createState();
+    mapPageState = MapPage(listings: listings, onTabSelected: (_) {}).createState();
   });
 
   group('MapPage', () {
@@ -51,9 +69,9 @@ void main() {
       final originalRoadClosureVisibility = preferredRoadClosurePolygonVisible;
       addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
       firstExecution = false;
-      await tester.pumpWithClock(MaterialApp(
-        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
-      ));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}),
+      )));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
 
@@ -84,12 +102,12 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWithClock(MaterialApp(
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
           theme: ThemeData(platform: platform),
           home: Scaffold(
-            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
-        ));
+        )));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.filter_alt));
         await tester.pumpAndSettle();
@@ -138,8 +156,11 @@ void main() {
         addTearDown(tester.view.resetViewPadding);
         addTearDown(tester.view.resetPadding);
 
-        await tester.pumpWidget(MaterialApp(
-          home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+        await tester.pumpWidget(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: MapPage(listings: listings, onTabSelected: (_) {}),
+          ),
         ));
         await tester.pump();
         await tester.tap(find.byTooltip('Search the map'));
@@ -175,7 +196,7 @@ void main() {
         tester.platformDispatcher.clearPlatformBrightnessTestValue();
       });
       await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {})),
       ));
       await tester.pump();
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -222,7 +243,7 @@ void main() {
     testWidgets('marker size changes refresh existing markers without resetting filters', (tester) async {
       addTearDown(() => preferredMapMarkerSize.value = MapMarkerSize.medium);
       await tester.pumpWidget(MaterialApp(
-        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+        home: MapPage(listings: listings, onTabSelected: (_) {}),
       ));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -267,7 +288,6 @@ void main() {
                     nearestMarkerCount: nearestMarkerCount,
                     cancelMapNearest: () => setState(() => nearestMarkerCount = null),
                     onTabSelected: (_) {},
-                    analyticsService: FakeAnalyticsService(),
                   ),
                 ),
               ],
@@ -293,17 +313,16 @@ void main() {
 
       locationPermission = LocationPermission.deniedForever;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              onTabSelected: (_) {},
-              analyticsService: FakeAnalyticsService(),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(
+                listings: listings,
+                onTabSelected: (_) {},
+              ),
             ),
-          ),
-        ),
-      );
+          )));
       await tester.pump();
 
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
@@ -318,8 +337,11 @@ void main() {
       final originalListings = [...listings];
       addTearDown(() => listings = originalListings);
       listings = sharedLocationListings;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {})),
+        ),
       ));
       await tester.pump();
       await tester.tap(find.byIcon(Icons.search));
@@ -341,8 +363,11 @@ void main() {
         return true;
       });
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {})),
+        ),
       ));
       await tester.pump();
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -405,7 +430,7 @@ void main() {
     testWidgets('dot pulse pauses while the map page is hidden and resumes when visible', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: true),
         ),
       ));
 
@@ -417,7 +442,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: false),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: false),
         ),
       ));
 
@@ -431,7 +456,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: true),
         ),
       ));
 
@@ -448,13 +473,13 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Check the map buttons
@@ -478,9 +503,12 @@ void main() {
         mockListing('informationPoint'),
       ];
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
+          ),
         ),
       ));
       await tester.pump();
@@ -521,13 +549,13 @@ void main() {
       );
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -565,13 +593,13 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -598,13 +626,13 @@ void main() {
       preferredMapOrientation = MapOrientation.adaptive;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Find the compass button by its icon
@@ -641,13 +669,13 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Find the "Road closures" legend at the bottom left
@@ -688,13 +716,13 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Find the "Road closures" legend at the bottom left
@@ -726,13 +754,13 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -756,13 +784,13 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Obtain the state after mounting
@@ -805,13 +833,13 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Obtain the state after mounting
@@ -847,13 +875,13 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Obtain the state after mounting
@@ -1035,13 +1063,13 @@ void main() {
       ];
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Obtain the state after mounting
@@ -1223,13 +1251,13 @@ void main() {
       ];
 
       // Build the MapPage widget
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: MapPage(listings: listings, onTabSelected: (_) {}),
+            ),
+          )));
       await tester.pump();
 
       // Obtain the state after mounting
@@ -1275,7 +1303,7 @@ void main() {
         ),
       );
 
-      await tester.pumpWithClock(testWidget);
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: testWidget));
       await tester.pump();
 
       final animatedRotationFinder = find.byType(AnimatedRotation);

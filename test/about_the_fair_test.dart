@@ -1,7 +1,7 @@
 // App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -16,6 +16,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fake_url_launcher.dart';
 import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
@@ -56,11 +57,16 @@ void main() {
     }) async {
       listings = [];
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(
-        Provider<UrlLauncher>.value(
-          value: urlLauncher ?? FakeUrlLauncher(),
+      await tester.pumpWithClock(
+        MultiProvider(
+          providers: [
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
+            Provider<UrlLauncher>.value(
+              value: urlLauncher ?? FakeUrlLauncher(),
+            ),
+          ],
           child: MaterialApp(
-            home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
+            home: const AboutTheFairPage(),
             navigatorObservers: [
               if (navigatorObserver != null) navigatorObserver,
             ],
@@ -198,7 +204,7 @@ void main() {
         // Minimal listings so pages render correctly
         listings = [mockListing('glazedAndConfused')];
 
-        await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
         await settle(tester);
 
         // Obtain the HomePage state

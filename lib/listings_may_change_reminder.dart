@@ -2,7 +2,7 @@ import 'dart:io';
 
 // App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 
@@ -96,7 +96,6 @@ class ListingUpdateNotifier {
 
   static Future<void> maybeShowNotice(
     BuildContext context, {
-    required AnalyticsService analyticsService,
     bool allowListingsMayChange = true,
   }) async {
     if (onTest) {
@@ -129,7 +128,7 @@ class ListingUpdateNotifier {
     }
 
     final analyticsId = analyticsIdFor(noticeDate);
-    await analyticsService.logNoticeShown(analyticsId);
+    await context.read<AnalyticsService>().logNoticeShown(analyticsId);
     if (!context.mounted) {
       return;
     }
@@ -160,7 +159,7 @@ class ListingUpdateNotifier {
                         fillColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.tertiary),
                         onChanged: (value) {
                           HapticFeedback.selectionClick();
-                          analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                          context.read<AnalyticsService>().logButtonTapped('${analyticsId}_dont_show_again_toggle');
                           setState(() => dontShowAgain = value ?? false);
                         },
                         title: const Text("Don’t show this again"),
@@ -177,6 +176,7 @@ class ListingUpdateNotifier {
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
+                final analyticsService = context.read<AnalyticsService>();
                 analyticsService.logButtonTapped('${analyticsId}_ok');
                 if (isListingsMayChange) {
                   listingUpdateNoticeEnabled = !dontShowAgain;

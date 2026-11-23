@@ -1,5 +1,4 @@
 // App imports
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
@@ -19,7 +18,6 @@ void main() {
           appBarTitle: 'Timetable',
           currentTab: 2,
           onTabSelected: (_) {},
-          analyticsService: FakeAnalyticsService(),
           body: TextButton(
             onPressed: () => showInfoToast(context, 'Showing only music performances'),
             child: const Text('Change filter'),

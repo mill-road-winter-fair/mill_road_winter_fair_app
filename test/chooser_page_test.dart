@@ -1,6 +1,5 @@
 // App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Third-party imports
@@ -77,7 +76,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );
@@ -99,7 +97,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );
@@ -118,7 +115,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );

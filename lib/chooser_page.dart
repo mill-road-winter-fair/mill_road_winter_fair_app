@@ -5,27 +5,25 @@ import 'dart:ui' as ui;
 
 // App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_shadow/simple_shadow.dart';
+import 'package:provider/provider.dart';
 
 class ChooserPage extends StatefulWidget {
-
-  final AnalyticsService analyticsService;
   const ChooserPage({
     required this.theEvents,
     required this.onOpenTimetable,
     required this.onOpenListings,
     required this.onOpenMap,
     required this.onTabSelected,
-    required this.analyticsService,
     this.isVisible = true,
     super.key,
   });
@@ -193,7 +191,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
   void _restartAnimationTimer() {
     _idleTimer?.cancel();
-    _idleTimer = Timer(const Duration(seconds: _restartIdleAnimationPeriod), () 
+    _idleTimer = Timer(const Duration(seconds: _restartIdleAnimationPeriod), ()
       {
         if (!mounted) return;
         setState(() { _chosenHotspotID = null; });
@@ -229,7 +227,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/foodDrink.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_food');
+          context.read<AnalyticsService>().logButtonTapped('home_food');
           widget.onOpenListings('all', 'food');
         },
       ),
@@ -243,7 +241,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/music.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_music');
+          context.read<AnalyticsService>().logButtonTapped('home_music');
           widget.onOpenTimetable(false, true);
         },
       ),
@@ -257,7 +255,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1.05,
         assetPath: 'assets/infoPages/childrens.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_childrens');
+          context.read<AnalyticsService>().logButtonTapped('home_childrens');
           widget.onOpenListings('all', 'performanceChildrens');
         },
       ),
@@ -271,7 +269,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/shopping.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_shopping');
+          context.read<AnalyticsService>().logButtonTapped('home_shopping');
           widget.onOpenListings('all', 'shopping');
         },
       ),
@@ -285,7 +283,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/charityCommunityInfo.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_community');
+          context.read<AnalyticsService>().logButtonTapped('home_community');
           widget.onOpenListings('all', 'charityCommunityInfo');
         },
       ),
@@ -299,7 +297,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/visitExperience.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_visits');
+          context.read<AnalyticsService>().logButtonTapped('home_visits');
           widget.onOpenListings('all', 'visitExperience');
         },
       ),
@@ -313,7 +311,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/services.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_services');
+          context.read<AnalyticsService>().logButtonTapped('home_services');
           widget.onOpenListings('all', 'service');
         },
       ),
@@ -327,7 +325,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 0.9,
         assetPath: 'assets/infoPages/nearby.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_nearby');
+          context.read<AnalyticsService>().logButtonTapped('home_nearby');
           widget.onOpenMap(10);
         },
       ),
@@ -413,14 +411,13 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
             appBarTitle: 'Welcome to the 2026 Fair! ', // deliberate space
             currentTab: 0,
             onTabSelected: widget.onTabSelected,
-            analyticsService: widget.analyticsService,
             appBarActions: [
               IconButton(
                 tooltip: 'Go to Settings to customise the app',
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('homepage_settings');
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                  context.read<AnalyticsService>().logButtonTapped('homepage_settings');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
                 },
                 icon: Icon(
                   Icons.settings,
@@ -450,7 +447,6 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                         colourScheme: colourScheme,
                         onHotspotTap: _selectHotspot,
                         maxWidth: constraints.maxWidth,
-                        analyticsService: widget.analyticsService,
                       );
                     },
                   );
@@ -482,7 +478,6 @@ class _ChooserContent extends StatelessWidget {
     required this.colourScheme,
     required this.onHotspotTap,
     required this.maxWidth,
-    required this.analyticsService,
   });
 
   final List<Hotspot> hotspots;
@@ -497,7 +492,6 @@ class _ChooserContent extends StatelessWidget {
   final ColorScheme colourScheme;
   final void Function(int index) onHotspotTap;
   final double maxWidth;
-  final AnalyticsService analyticsService;
 
   @override
   Widget build(BuildContext context) {
@@ -535,8 +529,8 @@ class _ChooserContent extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('home_about_fair');
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
+                    context.read<AnalyticsService>().logButtonTapped('home_about_fair');
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
                   },
                   child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
                 ),
@@ -861,7 +855,7 @@ class _CachedNormalImage extends StatelessWidget {
 
 
 class _CachedLabel extends StatelessWidget {
-  
+
   const _CachedLabel({
     required this.hotspot,
     required this.colourScheme,

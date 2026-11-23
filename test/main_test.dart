@@ -3,7 +3,7 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fake_url_launcher.dart';
 import 'fakes/fixed_date_time_provider.dart';
 import 'mocks/listings_mocks.dart';
@@ -67,7 +68,7 @@ void main() {
         addTearDown(() => onTest = true);
         listings = [mockListing('glazedAndConfused')];
         await tester.pumpWithClock(
-          MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+          Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)),
           dateTimeProvider: FixedDateTimeProvider(fairDate.subtract(const Duration(days: 1))),
         );
         await tester.pump();
@@ -112,7 +113,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       expect(find.textContaining('Welcome'), findsOneWidget);
 
@@ -130,7 +131,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
@@ -157,18 +158,25 @@ void main() {
 
       Future<void> openDrawer(WidgetTester tester) async {
         await tester.pumpWithClock(
-          Provider<UrlLauncher>.value(
-            value: fakeUrlLauncher,
+          MultiProvider(
+            providers: [
+              Provider<UrlLauncher>.value(
+                value: fakeUrlLauncher,
+              ),
+              Provider<AnalyticsService>.value(
+                value: FakeAnalyticsService(),
+              ),
+            ],
             child: MaterialApp(
               home: FairScaffold(
                 appBarTitle: 'Test',
-                body: const SizedBox(),
-                currentTab: 0,
-                onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+                  body: const SizedBox(),
+                  currentTab: 0,
+                  onTabSelected: (_) {},
+                ),
               ),
             ),
-          ),
-        );
+          );
 
         await tester.tap(find.byIcon(Icons.menu));
         await tester.pumpAndSettle();
@@ -263,7 +271,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -283,7 +291,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -303,7 +311,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -327,7 +335,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -352,7 +360,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -374,7 +382,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -403,10 +411,10 @@ void main() {
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
-      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: Scaffold(body: SizedBox()))));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -444,7 +452,7 @@ void main() {
       favouriteListingKeys.value = {...favouriteListingKeys.value, '26001'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
       await tester.pump();
 
       // Tap the Favourites button the NavBar
