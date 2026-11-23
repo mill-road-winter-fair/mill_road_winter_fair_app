@@ -124,7 +124,7 @@ void main() {
     await service.setAnalyticsEnabled(true);
     expect(sdk.calls, ['collection:false', 'consent:true', 'collection:true', 'screen:SettingsPage']);
     expect((await SharedPreferences.getInstance()).getBool('usageAnalyticsEnabled'), true);
-    expect(sdk.properties['distance_unit'], 'british');
+    expect(sdk.properties['distance_unit'], 'metric');
     expect(sdk.properties['sorting_method'], 'nearest');
     expect(sdk.properties['usage_analytics'], 'enabled');
     await service.logButtonTapped('theme_preference_option');
