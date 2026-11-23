@@ -952,6 +952,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     final type = getCategory(listing);
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
+    bool detailsVisible = false;
 
     Marker newMarker = Marker(
         markerId: markerId,
@@ -1015,7 +1016,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         child: SingleChildScrollView(
                           controller: specificSheetModalScrollController,
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 20),
                             child: SpecificListingInfoSheet(
                               listingId: listing['id'],
                               cancelled: listing['cancelled'] == 'TRUE' ? true : false,
@@ -1032,10 +1033,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               startTime: "${listing['startTime']}",
                               endTime: "${listing['endTime']}",
                               approxDistance: distanceMessage,
-                              detailsVisible: true,
+                              detailsVisible: detailsVisible,
                               listingFavourited: isListingFavourited(listing['id']),
                               listingAlerted: alertsStore.alertExists(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onDetailsTapped: () {
+                                HapticFeedback.lightImpact();
+                                setModalState(() { detailsVisible = !detailsVisible; });
+                              },
+                              onFavouriteTapped: () {
+                                HapticFeedback.lightImpact();
+                                favouriteOrNotListing(listing['id']);
+                              },
                               onGetDirections: (navigationInProgress) ? null : () {
                                 Navigator.push(
                                   context,

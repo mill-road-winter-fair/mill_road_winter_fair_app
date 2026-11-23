@@ -483,7 +483,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
             // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
+            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 12),
             if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
           ],
         ),
