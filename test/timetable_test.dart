@@ -55,12 +55,61 @@ void main() {
             await tester.pump();
           } else {
             await tester.pump(const Duration(seconds: 31));
+            expect(selectedIds(), initiallyEmpty ? isEmpty : ['morning']);
+            await tester.pump(const Duration(seconds: 30));
           }
           expect(selectedIds(), ['noon']);
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox.shrink());
         });
       }
+    }
+
+    for (final hideTab in [true, false]) {
+      testWidgets('clock pauses while ${hideTab ? 'tab is hidden' : 'app is inactive'} and restarts on return', (tester) async {
+        onTest = true;
+        firstExecution = false;
+        SharedPreferences.setMockInitialValues({});
+        final savedListings = listings;
+        addTearDown(() => listings = savedListings);
+        listings = [mockListing('morningPerformance'), mockListing('noonPerformance')];
+        final clock = MutableClock(DateTime(fairDate.year, fairDate.month, fairDate.day, 10));
+        Future<void> showPage(bool visible) => tester.pumpWithClock(MaterialApp(home: TimetablePage(
+          theEvents: listings,
+          isVisible: visible,
+          onlyNowOrSoon: true,
+          onTabSelected: (_) {},
+          onFilterChange: (_, __) {},
+          analyticsService: FakeAnalyticsService(),
+        )), dateTimeProvider: clock);
+        await showPage(true);
+        await tester.pumpAndSettle();
+        final state = tester.state<TimetablePageState>(find.byType(TimetablePage));
+        List<String> selectedIds() => state.theFilteredEvents.values.expand((events) => events).map((event) => event.id).toList();
+        expect(selectedIds(), ['morning']);
+        if (hideTab) {
+          await showPage(false);
+        } else {
+          state.didChangeAppLifecycleState(AppLifecycleState.inactive);
+        }
+        final hiddenResults = state.theFilteredEvents;
+        clock.time = DateTime(fairDate.year, fairDate.month, fairDate.day, 11, 45);
+        await tester.pump(const Duration(minutes: 2));
+        expect(identical(state.theFilteredEvents, hiddenResults), isTrue);
+        expect(tester.binding.transientCallbackCount, 0);
+        if (hideTab) {
+          await showPage(true);
+        } else {
+          state.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await tester.pump();
+        }
+        expect(selectedIds(), ['noon']);
+        clock.time = DateTime(fairDate.year, fairDate.month, fairDate.day, 13);
+        await tester.pump(const Duration(minutes: 1));
+        expect(selectedIds(), isEmpty);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
     }
 
     testWidgets('filter feedback replaces stale messages and expires', (tester) async {
