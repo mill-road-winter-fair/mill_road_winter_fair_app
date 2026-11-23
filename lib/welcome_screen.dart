@@ -92,6 +92,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   void initState() {
     debugPrint('OnBoardingPageState initState() called');
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.analyticsService.showAnalyticsConsentDialog(context));
   }
 
   @override
