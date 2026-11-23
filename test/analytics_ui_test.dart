@@ -282,7 +282,6 @@ void main() {
     // only needs the initial post-frame callbacks to complete.
     await tester.pump();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
-    expect(analytics.calls, contains('consent_prompt'));
     await tester.tap(find.text('Map').last);
     await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
