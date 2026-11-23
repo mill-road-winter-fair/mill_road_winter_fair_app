@@ -24,6 +24,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String endTime;
   final String approxDistance;
   final ColorScheme colorScheme;
+  final String description;
   final AnalyticsService analyticsService;
 
   const GroupListingInfoSheet({
@@ -34,6 +35,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.endTime,
     required this.approxDistance,
     required this.colorScheme,
+    required this.description,
     required this.analyticsService,
     super.key,
   });
@@ -78,8 +80,8 @@ class GroupListingInfoSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
-              if (!brickAndMortar) Expanded(
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              Expanded(
                 flex: 7,
                 child: Text(
                   "$startTime—$endTime",
@@ -89,7 +91,7 @@ class GroupListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          // const SizedBox(height: 8),
+          if (description.isNotEmpty) Text(description, style: const TextStyle(fontSize: 16, color: Colors.white)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 8,
@@ -481,7 +483,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
             // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
+            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 12),
             if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
           ],
         ),

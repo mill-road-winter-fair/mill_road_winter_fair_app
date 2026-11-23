@@ -29,6 +29,7 @@ void main() {
                   endTime: listing['endTime'] as String,
                   approxDistance: '',
                   colorScheme: const ColorScheme.light(),
+                  description: listing['description'] as String,
                   analyticsService: FakeAnalyticsService(),
                 ),
               ),

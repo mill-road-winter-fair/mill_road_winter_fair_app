@@ -30,7 +30,7 @@ class WelcomeScreen extends StatelessWidget {
     debugPrint('WelcomeScreen build() called');
     // The app guide shares the existing navigator and its route observer.
     if (Navigator.maybeOf(context) != null) {
-      return OnBoardingPage(analyticsService: analyticsService);
+      return OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished);
     }
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
@@ -92,6 +92,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   void initState() {
     debugPrint('OnBoardingPageState initState() called');
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.analyticsService.showAnalyticsConsentDialog(context));
   }
 
   @override
@@ -130,7 +131,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     final pageDecoration = PageDecoration(
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: colourScheme.onSecondary),
       bodyTextStyle: TextStyle(fontSize: 19, color: colourScheme.onSecondary),
-      bodyPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      bodyPadding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
       titlePadding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 12, 16, 10),
       contentMargin: const EdgeInsets.symmetric(horizontal: 16),
       pageMargin: EdgeInsets.zero,
@@ -361,10 +362,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: colourScheme.primary),
-                  child: const FittedBox(
+                  child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('Take me straight to the Fair!',
-                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: Text('Take me ${(firstExecution) ? 'straight' : 'back'} to the Fair!',
+                        style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                   onPressed: () {
                     HapticFeedback.heavyImpact();
@@ -405,7 +406,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                         widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                         onPressed();
                       },
-                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed),
+                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed, size: 24),
               ),
             ),
             done: FittedBox(
