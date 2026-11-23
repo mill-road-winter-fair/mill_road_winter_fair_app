@@ -488,12 +488,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               ]),
                             );
                           }).toList(),
-                          onSelected: (value) => (analyticsEnabledForBuild)
-                              ? (bool value) async {
-                                HapticFeedback.selectionClick();
-                                widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                                await widget.analyticsService.setAnalyticsEnabled(value);
-                                if (mounted) setState(() {});
+                          onSelected: (analyticsEnabledForBuild)
+                              ? (bool? value) async {
+                                if (value != null) {
+                                  HapticFeedback.selectionClick();
+                                  widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                                  await widget.analyticsService.setAnalyticsEnabled(value);
+                                  if (mounted) setState(() {});
+                                }
                               }
                             : null,
                         )),
