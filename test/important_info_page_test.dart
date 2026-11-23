@@ -1,7 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
@@ -9,7 +6,17 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fake_url_launcher.dart';
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 import 'fakes/fake_analytics_service.dart';
@@ -42,7 +49,7 @@ void main() {
       expect(find.text('Caution – vehicles!'), findsOneWidget);
       expect(find.text('First aid'), findsOneWidget);
       expect(find.text('Coming with children?'), findsOneWidget);
-      expect(find.text('Keep the pavement clear! Keep the Fair alive!'), findsOneWidget);
+      expect(find.text('Keep the pavement clear!\nKeep the Fair alive!'), findsOneWidget);
       expect(find.text('Road closure'), findsOneWidget);
       expect(find.text('On the day, you can also phone 07486 398744.'), findsOneWidget);
       expect(find.text('Our responsibilities'), findsOneWidget);
@@ -55,32 +62,7 @@ void main() {
 
       // Minimal listings so pages render correctly
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(Provider<AnalyticsService>.value(

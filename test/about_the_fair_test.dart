@@ -1,8 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
@@ -10,7 +6,18 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fake_url_launcher.dart';
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 import 'fakes/fake_analytics_service.dart';
@@ -78,16 +85,11 @@ void main() {
     }) {
       final paragraph = tester.widget<Text>(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Text &&
-              widget.textSpan?.toPlainText().startsWith(paragraphStartsWith) ==
-                  true,
+          (widget) => widget is Text && widget.textSpan?.toPlainText().startsWith(paragraphStartsWith) == true,
         ),
       );
       final paragraphSpan = paragraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!
-          .whereType<TextSpan>()
-          .singleWhere((span) => span.text == linkText);
+      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == linkText);
 
       return linkSpan.recognizer as TapGestureRecognizer;
     }
@@ -112,31 +114,31 @@ void main() {
         (
           paragraph: 'Opening ceremony',
           link: 'Ditchburn Gardens',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.200389, 0.136465),
         ),
         (
           paragraph: 'Parade',
           link: 'Salisbury Club',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.1970778, 0.1472252),
         ),
         (
           paragraph: 'Parade',
           link: 'Petersfield',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.202858, 0.132253),
         ),
         (
           paragraph: 'Final parade',
           link: 'Gwydir Street',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.199627, 0.138407),
         ),
         (
           paragraph: 'Final parade',
           link: 'Petersfield',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.202858, 0.132253),
         ),
       ];
@@ -172,11 +174,9 @@ void main() {
 
       const sponsorUrls = {
         'Bush & Co Sales and Lettings': 'https://bushandco.co.uk/',
-        'Al-Amin': 'https://www.alamin.co.uk/',
         'Anglia Ruskin University': 'https://www.aru.ac.uk/',
         'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
         'Love Mill Road': 'https://www.lovemillroad.org.uk/',
-        'Regal Star Catering': 'https://www.lamaisondusteak.co.uk/',
         'Taank Optometrists': 'https://taank.co.uk/',
       };
 
@@ -204,44 +204,13 @@ void main() {
         firstExecution = false;
 
         // Minimal listings so pages render correctly
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+        listings = [mockListing('glazedAndConfused')];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
-      await settle(tester);
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+        await settle(tester);
 
         // Obtain the HomePage state
-        final homePageState =
-            tester.state(find.byType(HomePage)) as HomePageState;
+        final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
         // 1) Select Food tab (index 1)
         await tester.tap(find.text('Listings'));
@@ -262,7 +231,7 @@ void main() {
         expect(homePageState.index, 3);
 
         // 2) Select Stalls tab (index 2)
-        await tester.tap(find.text('Listings'));
+        await tester.tap(find.text('Listings').last);
         await settle(tester);
         expect(homePageState.index, 3);
 

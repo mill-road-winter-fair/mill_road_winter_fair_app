@@ -1,26 +1,36 @@
-import 'fakes/fixed_date_time_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// App imports
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+
+// Third-party imports
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fixed_date_time_provider.dart';
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 void main() {
   testWidgets('listing dialogs share the injected clock and react to a replacement', (tester) async {
+    final listing = mockListing('performanceGroup');
     final app = MaterialApp(
       home: Builder(
         builder: (context) => Scaffold(
           body: TextButton(
             onPressed: () => showDialog<void>(
               context: context,
-              builder: (_) => const Dialog(
+              builder: (_) => Dialog(
                 child: GroupListingInfoSheet(
-                  title: 'Performances',
-                  categories: ['Music'],
-                  startTime: '10:30',
-                  endTime: '16:30',
+                  title: listing['title'] as String,
+                  categories: [listing['subtitle'] as String],
+                  startTime: listing['startTime'] as String,
+                  endTime: listing['endTime'] as String,
                   approxDistance: '',
-                  colorScheme: ColorScheme.light(),
+                  colorScheme: const ColorScheme.light(),
+                  description: listing['description'] as String,
+                  analyticsService: FakeAnalyticsService(),
                 ),
               ),
             ),

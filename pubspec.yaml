@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.9.0+20261006A
+version: 2.0.2+20261118-1
 
 environment:
   sdk: ^3.5.4
@@ -33,7 +33,6 @@ dependencies:
   mockito: ^5.4.4
   flutter_launcher_icons: ^0.14.1
   flutter_native_splash: ^2.4.3
-  flutter_dotenv: ^6.0.1
   font_awesome_flutter: ^11.0.0
   introduction_screen: ^5.0.1
   http: ^1.0.0
@@ -61,6 +60,8 @@ dependencies:
   permission_handler: ^13.0.2
   provider: ^6.1.5+1
   simple_shadow: ^0.3.1
+  material_ui: any
+  cupertino_ui: any
 
 dev_dependencies:
   flutter_test:
@@ -88,14 +89,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - .env
     - assets/
-    - assets/aboutPage/
+    - assets/infoPages/
     - assets/icons/
-    - assets/importantInfoPage/
     - assets/mapMarkers/
-    - assets/welcomeScreen/
-    - assets/chooserPage/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -140,7 +137,7 @@ flutter_native_splash:
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
   # size of the app. Only one parameter can be used, color and background_image cannot both be set.
   color: "#ffffff"
-  icon_background_color: "#a6222b"
+  icon_background_color: "#1c156f"
   image: "assets/icons/splashScreenIcon.png"
 
   # Optional parameters are listed below.  To enable a parameter, uncomment the line by removing
@@ -177,7 +174,7 @@ flutter_native_splash:
   # Following are specific parameters for Android 12+.
   android_12:
     color: "#ffffff"
-    icon_background_color: "#a6222b"
+    icon_background_color: "#192967"
     image: "assets/icons/splashScreenIcon_forAndroid.png"
     # The image parameter sets the splash screen icon image.  If this parameter is not specified,
     # the app's launcher icon will be used instead.
@@ -204,7 +201,7 @@ flutter_native_splash:
     # parameters from above.
     image_dark: "assets/icons/splashScreenIcon_forAndroid.png"
     color_dark: "#2c2c2c"
-    icon_background_color_dark: "#c8000a"
+    icon_background_color_dark: "#192967"
 
   # The android, ios and web parameters can be used to disable generating a splash screen on a given
   # platform.

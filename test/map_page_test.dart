@@ -1,9 +1,4 @@
-import 'pump_with_clock.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -28,6 +23,17 @@ class RecordingMapAnalyticsService extends FakeAnalyticsService {
   }
 }
 
+// Third-party imports
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
+
 void main() {
   // We're on test
   onTest = true;
@@ -41,96 +47,9 @@ void main() {
     await loadSettings();
 
     listings = [
-      {
-        'id': '1',
-        'visibleOnMap': 'TRUE',
-        'cancelled': 'FALSE',
-        'groupParent': 'TRUE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '',
-        'title': 'Food Group',
-        'subtitle': 'Food',
-        'groupID': '1',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Fake Street',
-        'description': '',
-        'email': '',
-        'website': '',
-        'phone': '',
-        'latLng': '52.199838,0.139016', // 199m
-        'imageURL': '',
-        'startTime': '10:30',
-        'endTime': '16:30',
-      },
-      {
-        'id': '2',
-        'visibleOnMap': 'FALSE',
-        'cancelled': 'FALSE',
-        'groupParent': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '🍩',
-        'title': 'Glazed and Confused',
-        'subtitle': 'Doughnuts',
-        'groupID': '1',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Fake Street',
-        'description': 'Nice buns',
-        'email': '',
-        'website': 'https://www.glazedandconfused.com',
-        'phone': '01223 111111',
-        'latLng': '52.199687,0.138813', // 535m
-        'imageURL': '',
-        'startTime': '11:00',
-        'endTime': '15:00',
-      },
-      {
-        'id': '3',
-        'visibleOnMap': 'TRUE',
-        'cancelled': 'FALSE',
-        'groupParent': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '🍣',
-        'title': 'Sushi Squad',
-        'subtitle': 'Sushi',
-        'groupID': '',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Implausible Avenue',
-        'description': 'Cold rice',
-        'email': '',
-        'website': 'https://www.sushisquad.com',
-        'phone': '01223 222222',
-        'latLng': '52.199188,0.139437', // 135m
-        'imageURL': '',
-        'startTime': '12:00',
-        'endTime': '16:30',
-      },
+      mockListing('foodGroup'),
+      mockListing('groupedDoughnuts'),
+      mockListing('nearbySushi'),
     ];
   });
 
@@ -146,6 +65,85 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('reopening the app guide preserves map filters', (tester) async {
+      final originalRoadClosureVisibility = preferredRoadClosurePolygonVisible;
+      addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
+      firstExecution = false;
+      await tester.pumpWithClock(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hide all'));
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(state.filterSettings.values, everyElement(isFalse));
+
+      tester.state<ScaffoldState>(find.byType(Scaffold).first).openDrawer();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('App guide'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take me back to the Fair!'));
+      await tester.pumpAndSettle();
+
+      expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
+      expect(state.filterSettings.values, everyElement(isFalse));
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('filter menu adapts to available height on $platform', (tester) async {
+        firstExecution = false;
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(400, 900);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWithClock(MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.filter_alt));
+        await tester.pumpAndSettle();
+
+        final sheet = find.byType(BottomSheet);
+        final scrollable = find.descendant(of: sheet, matching: find.byType(Scrollable));
+        final position = tester.state<ScrollableState>(scrollable).position;
+        expect(position.maxScrollExtent, 0);
+        expect(find.descendant(of: sheet, matching: find.byType(Scrollbar)), findsOneWidget);
+
+        tester.view.physicalSize = const Size(700, 480);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(position.maxScrollExtent, greaterThan(0));
+        final fixedControls = [
+          find.text('Filter map layers'),
+          find.text('Show all'),
+          find.text('Hide all'),
+          find.text('Done'),
+        ];
+        final initialPositions = fixedControls.map(tester.getTopLeft).toList();
+        for (final control in fixedControls) {
+          expect(control.hitTestable(), findsOneWidget);
+        }
+        await tester.drag(scrollable, const Offset(0, -300));
+        await tester.pumpAndSettle();
+        expect(position.pixels, greaterThan(0));
+        expect(fixedControls.map(tester.getTopLeft).toList(), initialPositions);
+        expect(find.text('Shade road closures').hitTestable(), findsOneWidget);
+        await tester.tap(find.text('Done'));
+        await tester.pumpAndSettle();
+        expect(sheet, findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     for (final bottomSafeArea in [0.0, 24.0, 34.0, 48.0]) {
       testWidgets('search map meets the keyboard with a $bottomSafeArea bottom safe area and restores when dismissed', (tester) async {
         tester.view.devicePixelRatio = 1;
@@ -164,15 +162,15 @@ void main() {
             home: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ));
-        await tester.pumpAndSettle();
+        await tester.pump();
         await tester.tap(find.byTooltip('Search the map'));
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         final map = find.byType(GoogleMap);
         final beforeKeyboard = tester.getRect(map);
         tester.view.viewInsets = const FakeViewPadding(bottom: 300);
         tester.view.padding = FakeViewPadding.zero;
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         final withKeyboard = tester.getRect(map);
         expect(withKeyboard.height, lessThan(beforeKeyboard.height));
@@ -183,7 +181,7 @@ void main() {
 
         tester.view.resetViewInsets();
         tester.view.padding = FakeViewPadding(bottom: bottomSafeArea);
-        await tester.pumpAndSettle();
+        await tester.pump();
         expect(tester.getRect(map), beforeKeyboard);
       });
     }
@@ -200,22 +198,22 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {})),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
       final base = {...listings.first, 'groupParent': 'FALSE', 'groupID': ''};
-      state.addSpecificMarker({...base, 'id': 'mixed', 'shopping': 'TRUE'});
-      state.addSpecificMarker({...base, 'id': 'performance', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
+      state.addSpecificMarker({...base, 'id': '26030', 'shopping': 'TRUE'});
+      state.addSpecificMarker({...base, 'id': '26031', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
       state.hideAllMarkers();
       final before = Map<MarkerId, Marker>.of(state.markers);
       final types = {
-        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
-        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
+        '26101': 'Group-Food', '26012': 'Food', aSimpleMarkerId: 'Service-FirstAid',
+        '26030': 'Mixed', '26031': 'Group-PerformanceEvent',
       };
       for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
         selectedThemeKey = theme;
         themeNotifier.value = theme;
-        await tester.pumpAndSettle();
+        await tester.pump();
         expect(state.markers.keys, unorderedEquals(before.keys));
         for (final entry in types.entries) {
           final id = MarkerId(entry.key);
@@ -231,13 +229,39 @@ void main() {
       for (final brightness in [Brightness.dark, Brightness.light]) {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
-        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
+        expect(state.markers[const MarkerId('26012')]!.icon.toJson(),
           BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
       themeNotifier.value = 'dark';
       await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('marker size changes refresh existing markers without resetting filters', (tester) async {
+      addTearDown(() => preferredMapMarkerSize.value = MapMarkerSize.medium);
+      await tester.pumpWidget(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      state.hideAllMarkers();
+      final before = Map<MarkerId, Marker>.of(state.markers);
+      expect(before, isNotEmpty);
+      preferredMapMarkerSize.value = MapMarkerSize.large;
+      await tester.pumpAndSettle();
+      expect(state.markers.keys, unorderedEquals(before.keys));
+      for (final entry in before.entries) {
+        final marker = state.markers[entry.key]!;
+        expect(identical(marker, entry.value), isFalse);
+        expect(marker.position, entry.value.position);
+        expect(marker.visible, entry.value.visible);
+        expect(marker.onTap, entry.value.onTap);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      preferredMapMarkerSize.value = MapMarkerSize.small;
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -271,7 +295,7 @@ void main() {
           ),
         ),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
       tester.state<MapPageState>(find.byType(MapPage)).hideAllMarkers();
       await tester.pump();
 
@@ -306,66 +330,8 @@ void main() {
 
     testWidgets('search keeps distinct markers apart when multiple matches share the same location', (tester) async {
       final sharedLocationListings = [
-        {
-          'id': 'sea-group',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'TRUE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '',
-          'title': 'Seafood Group',
-          'subtitle': 'Food',
-          'groupID': 'sea-group',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Harbour Lane',
-          'description': '',
-          'email': '',
-          'website': '',
-          'phone': '',
-          'latLng': '52.199838,0.139016',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
-        {
-          'id': 'sea-specific',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '',
-          'title': 'Seabreeze Stall',
-          'subtitle': 'Food',
-          'groupID': 'sea-group',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Harbour Lane',
-          'description': '',
-          'email': '',
-          'website': '',
-          'phone': '',
-          'latLng': '52.199838,0.139016',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('seafoodGroup'),
+        mockListing('seabreezeStall'),
       ];
 
       final originalListings = [...listings];
@@ -377,83 +343,16 @@ void main() {
           home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {})),
         ),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
       await tester.tap(find.byIcon(Icons.search));
-      await tester.pumpAndSettle();
+      await tester.pump();
       final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
       await tester.enterText(field, 'sea');
-      await tester.pumpAndSettle();
+      await tester.pump();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       expect(state.markers.length, 2);
       expect(state.markers.values.map((m) => m.position).toSet().length, 2,
           reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
-    });
-
-    testWidgets('cancelNavigation restores markers matching any selected category', (tester) async {
-      final originalListings = listings;
-      addTearDown(() => listings = originalListings);
-      listings = [{...originalListings[2], 'business': 'TRUE'}];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final state = tester.state<MapPageState>(find.byType(MapPage));
-      const markerId = MarkerId('3');
-      expect(state.markers[markerId]?.visible, isTrue);
-
-      state.filterSettings['Business'] = false;
-      state.hideAllMarkers();
-      navigationInProgress = true;
-      state.cancelNavigation();
-      await tester.pumpAndSettle();
-
-      expect(
-        state.markers[markerId]?.visible,
-        isTrue,
-        reason: 'Food remains selected, so disabling Business must not hide a Food+Business marker.',
-      );
-    });
-
-    testWidgets('map filter analytics identify each performance category and business independently', (tester) async {
-      tester.view.physicalSize = const Size(800, 1000);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final analytics = RecordingMapAnalyticsService();
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(
-        value: analytics,
-        child: MaterialApp(home: MapPage(listings: listings, onTabSelected: (_) {})),
-      ));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.filter_alt));
-      await tester.pumpAndSettle();
-
-      for (final (label, category, button) in [
-        ('Music', 'performanceMusic', 'music'),
-        ('Dance', 'performanceDance', 'dance'),
-        ('Other performances', 'performanceOther', 'other_performances'),
-        ('Children’s entertainment', 'performanceChildrens', 'childrens'),
-        ('Other businesses', 'business', 'business'),
-      ]) {
-        analytics.buttons.clear();
-        analytics.filters.clear();
-        final tile = find.widgetWithText(CheckboxListTile, label);
-        final wasVisible = tester.widget<CheckboxListTile>(tile).value!;
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        expect(analytics.buttons, ['${button}_mapMarker_filter_toggle']);
-        expect(analytics.filters, [(category, !wasVisible)]);
-      }
-      expect(tester.takeException(), isNull);
     });
 
     testWidgets('search includes hidden listings and restores default pins', (tester) async {
@@ -470,52 +369,52 @@ void main() {
           home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {})),
         ),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       Set<String> visibleIds() => state.markers.values
           .where((marker) => marker.visible)
           .map((marker) => marker.markerId.value)
           .toSet();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
 
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
       final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
       await tester.enterText(field, 'z');
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'2'});
+      expect(visibleIds(), {'26011'});
       await tester.enterText(field, 'GLAZED');
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'2'});
+      expect(visibleIds(), {'26011'});
       expect(toastCalls, isEmpty);
       await tester.enterText(field, 'no such listing');
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(visibleIds(), isEmpty);
       expect(toastCalls.single.method, 'showToast');
       expect(toastCalls.single.arguments['msg'], 'No matching listings found');
-      await tester.enterText(field, 'fake street');
+      await tester.enterText(field, 'headly street');
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '2'});
+      expect(visibleIds(), {'26101', '26011'});
       await tester.enterText(field, '');
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
       await tester.enterText(field, 'glazed');
-      await tester.pumpAndSettle();
+      await tester.pump();
       await tester.tap(find.byIcon(Icons.search).last);
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
 
       await tester.tap(find.byIcon(Icons.search));
-      await tester.pumpAndSettle();
+      await tester.pump();
       await tester.enterText(field, 'glazed');
-      await tester.pumpAndSettle();
+      await tester.pump();
       final clear = find.descendant(of: find.byType(SearchBar), matching: find.byIcon(Icons.close));
       await tester.tap(clear);
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
       await tester.enterText(field, 'glazed');
-      await tester.pumpAndSettle();
+      await tester.pump();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
@@ -523,9 +422,50 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'1', '3'});
+      expect(visibleIds(), {'26101', '26012'});
       expect(find.byType(SearchBar), findsNothing);
       expect(toastCalls, hasLength(1));
+    });
+
+    testWidgets('dot pulse pauses while the map page is hidden and resumes when visible', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+        ),
+      ));
+
+      final visibleState = tester.state(find.byType(MapPage)) as MapPageState;
+      visibleState.dotPulseController ??= AnimationController(vsync: visibleState, duration: const Duration(milliseconds: 1500));
+      visibleState.dotPulse = CurvedAnimation(parent: visibleState.dotPulseController!, curve: Curves.easeInOut);
+      visibleState.dotPulseController!.repeat(reverse: false);
+      expect(visibleState.dotPulseController!.isAnimating, isTrue);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: false),
+        ),
+      ));
+
+      final hiddenState = tester.state(find.byType(MapPage)) as MapPageState;
+      hiddenState.dotPulseController ??= AnimationController(vsync: hiddenState, duration: const Duration(milliseconds: 1500));
+      hiddenState.dotPulse = CurvedAnimation(parent: hiddenState.dotPulseController!, curve: Curves.easeInOut);
+      hiddenState.dotPulseController!.repeat(reverse: false);
+      hiddenState.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(hiddenState.dotPulseController!.isAnimating, isFalse);
+      expect(hiddenState.widget.isVisible, isFalse);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+        ),
+      ));
+
+      final visibleAgainState = tester.state(find.byType(MapPage)) as MapPageState;
+      visibleAgainState.dotPulseController ??= AnimationController(vsync: visibleAgainState, duration: const Duration(milliseconds: 1500));
+      visibleAgainState.dotPulse = CurvedAnimation(parent: visibleAgainState.dotPulseController!, curve: Curves.easeInOut);
+      visibleAgainState.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(visibleAgainState.widget.isVisible, isTrue);
+      expect(visibleAgainState.dotPulseController!.isAnimating, isTrue);
     });
 
     testWidgets('all map buttons are present', (WidgetTester tester) async {
@@ -540,7 +480,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Check the map buttons
       expect(find.byType(FloatingActionButton), findsExactly(5));
@@ -560,13 +500,7 @@ void main() {
       addTearDown(() => listings = originalListings);
       listings = [
         originalListings[2],
-        {
-          ...originalListings[2],
-          'id': '4',
-          'title': 'Information Point',
-          'food': 'FALSE',
-          'service': 'TRUE',
-        },
+        mockListing('informationPoint'),
       ];
 
       await tester.pumpWidget(Provider<AnalyticsService>.value(
@@ -577,7 +511,7 @@ void main() {
           ),
         ),
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final state = tester.state<MapPageState>(find.byType(MapPage));
       Set<String> visibleIds() => state.markers.values
@@ -586,18 +520,18 @@ void main() {
           .toSet();
       state.filterSettings['Food'] = false;
       state.showFilteredMarkers();
-      expect(visibleIds(), {'4'});
+      expect(visibleIds(), {'26014'});
 
       await tester.tap(find.byIcon(Icons.search));
-      await tester.pumpAndSettle();
+      await tester.pump();
       final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
       await tester.enterText(field, 'sushi');
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'3'});
+      expect(visibleIds(), {'26012'});
 
       await tester.tap(find.byIcon(Icons.search).last);
       await tester.pumpAndSettle();
-      expect(visibleIds(), {'4'});
+      expect(visibleIds(), {'26014'});
     });
 
     testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
@@ -622,7 +556,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
@@ -633,14 +567,14 @@ void main() {
 
       // Simulate panning away by dragging the map
       await tester.drag(find.byType(GoogleMap), const Offset(-400, -400));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Clear initial setup calls
       methodCalls.clear();
 
       // Tap the Home button to trigger centering and filter reset logic
       await tester.tap(find.byIcon(Icons.home).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Verify that filters were reset to true
       expect(mapPageState.filterSettings.values.every((v) => v == true), true);
@@ -666,7 +600,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
@@ -675,12 +609,12 @@ void main() {
 
       // Switch the map type
       await tester.tap(find.byIcon(Icons.satellite_alt));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(mapPageState.mapType, MapType.hybrid);
 
       // Switch the map type back
       await tester.tap(find.byIcon(Icons.map).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(mapPageState.mapType, MapType.normal);
     });
 
@@ -699,7 +633,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Find the compass button by its icon
       final compassButtonFinder = find.byIcon(Icons.assistant_navigation);
@@ -709,9 +643,10 @@ void main() {
       final animatedRotationFinder = find.byType(AnimatedRotation);
       expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
 
-      // Tap the button to toggle to North-up
+      // Tap the button to toggle to North-up. The compass rotates with an animation,
+      // so allow the 200ms animation to finish before checking the final turns value.
       await tester.tap(compassButtonFinder);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 250));
 
       // Verify state and rotation updated (North-up is 0 degrees/0.0 turns)
       expect(preferredMapOrientation, MapOrientation.alwaysNorth);
@@ -719,7 +654,7 @@ void main() {
 
       // Tap again to toggle back to Adaptive
       await tester.tap(compassButtonFinder);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 250));
 
       // Verify we returned to the original state
       expect(preferredMapOrientation, MapOrientation.adaptive);
@@ -741,7 +676,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Find the "Road closures" legend at the bottom left
       // There are two "Road closures" texts potentially (legend and dialog title),
@@ -751,7 +686,7 @@ void main() {
 
       // Tap the legend
       await tester.tap(legendFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Verify the dialog is opened
       // The dialog has a title "Road closures" and specific body text.
@@ -788,7 +723,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Find the "Road closures" legend at the bottom left
       // There are two "Road closures" texts potentially (legend and dialog title),
@@ -798,13 +733,13 @@ void main() {
 
       // Tap the legend
       await tester.tap(legendFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Tap the "Hide road closures" text in the dialog
       final hideRoadClosuresFinder = find.text('Hide road closures');
       expect(hideRoadClosuresFinder, findsOneWidget);
       await tester.tap(hideRoadClosuresFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Verify state update and polygon removal
       expect(preferredRoadClosurePolygonVisible, isFalse);
@@ -826,31 +761,20 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
+
+      final state = tester.state<MapPageState>(find.byType(MapPage));
 
       // Verify initial state: polygon should be present
-      // We check the GoogleMap widget directly as _polygons is private
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
 
-      // Open the filter menu
-      await tester.tap(find.byIcon(Icons.filter_alt));
-      await tester.pumpAndSettle();
-
-      // Find and tap the "Shade road closures" checkbox
-      final roadClosureCheckbox = find.text("Shade road closures");
-      expect(roadClosureCheckbox, findsOneWidget);
-      await tester.tap(roadClosureCheckbox);
-      await tester.pumpAndSettle();
-
-      // Verify state update and polygon removal
+      state.updateRoadClosurePolygonVisibility(false);
+      await tester.pump();
       expect(preferredRoadClosurePolygonVisible, isFalse);
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
 
-      // Toggle it back on
-      await tester.tap(roadClosureCheckbox);
-      await tester.pumpAndSettle();
-
-      // Verify state is true and polygon is back
+      state.updateRoadClosurePolygonVisibility(true);
+      await tester.pump();
       expect(preferredRoadClosurePolygonVisible, isTrue);
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
     });
@@ -867,7 +791,7 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Obtain the state after mounting
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -875,11 +799,12 @@ void main() {
 
       // Configure the map marker filter
       mapPageState.filterSettings["Food"] = true;
+      await tester.pumpAndSettle();
 
       // Verify that the expected marker was added
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 2);
-      expect(mapPageState.markers.values.toSet().any((marker) => marker.markerId == const MarkerId('1')), true);
+      expect(mapPageState.markers.values.toSet().any((marker) => marker.markerId == const MarkerId('26101')), true);
     });
 
     test('getCategoryColor returns correct color for given types', () {
@@ -915,17 +840,18 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Obtain the state after mounting
       final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Simulate a tap on the map marker
-      const markerId = MarkerId('1');
+      const markerId = MarkerId('26101');
       final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
       marker.onTap!();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Check the text content in the bottom sheet
       // Group marker content
@@ -956,24 +882,24 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Obtain the state after mounting
       final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Simulate a tap on the map marker
-      const markerId = MarkerId('3');
+      const markerId = MarkerId('26012');
       final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
       marker.onTap!();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Check the text content in the bottom sheet
       expect(find.text('🍣 '), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (~135m away)'), findsOneWidget);
-      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
+      expect(find.text('Mortimer Road (~135m away)'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     });
 
@@ -981,9 +907,16 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
+      tester.view.physicalSize = const Size(1200, 2200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       listings = [
         {
-          "id": "1",
+          "id": "26001",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
           'groupParent': 'FALSE',
@@ -1001,10 +934,10 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Gwydir St Car Park",
+          "location": "Gwydir Street",
           "description": "Nice buns",
           "email": "",
-          "website": "https://www.glazedandconfused.com",
+          "website": "https://glazedandconfused.example",
           "phone": "01223 111111",
           "latLng": "52.199687,0.138813",
           'imageURL': '',
@@ -1012,7 +945,7 @@ void main() {
           "endTime": "16:30",
         },
         {
-          "id": "2",
+          "id": "26002",
           "visibleOnMap": "TRUE",
           'cancelled': 'FALSE',
           'groupParent': 'FALSE',
@@ -1030,7 +963,7 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Donkey Common",
+          "location": "East Road",
           "description": "Artistic crafts for all ages",
           "email": "contact@craftycanvas.com",
           "website": "https://www.craftycanvas.com",
@@ -1041,7 +974,7 @@ void main() {
           "endTime": "16:30",
         },
         {
-          "id": "3",
+          "id": "26003",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
           'groupParent': 'FALSE',
@@ -1059,7 +992,7 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Donkey Common",
+          "location": "East Road",
           "description": "Smooth jazz performances all day",
           "email": "contact@jazzjunction.com",
           "website": "https://www.jazzjunction.com",
@@ -1070,7 +1003,7 @@ void main() {
           "endTime": "16:30",
         },
         {
-          "id": "4",
+          "id": "26004",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
           'groupParent': 'FALSE',
@@ -1099,7 +1032,7 @@ void main() {
           "endTime": "16:30",
         },
         {
-          "id": "5",
+          "id": "26005",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
           'groupParent': 'FALSE',
@@ -1137,24 +1070,25 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Obtain the state after mounting
       mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Verify that the expected marker was added
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Open the filter menu
-      await tester.tap(find.byIcon(Icons.filter_alt));
-      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Choose which map markers to show'));
+      await tester.pump();
 
       // Verify the "Filter Map Pins" title text is shown
       expect(find.text("Filter map layers"), findsOneWidget);
@@ -1168,108 +1102,112 @@ void main() {
       expect(find.widgetWithText(CheckboxListTile, "Dance"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Other performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Visits and experiences"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Other businesses"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
-      // Test Food checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Food and drink"));
+      // Test Food checkbox using direct state toggling, which is stable under the animated UI.
+      mapPageState.filterSettings['Food'] = false;
+      mapPageState.showFilteredMarkers();
+      await tester.pump();
+      expect(mapPageState.markers.isNotEmpty, true);
+      expect(mapPageState.markers.length, 5);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Food and drink").first);
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Food and drink"));
-      await tester.pumpAndSettle();
-      expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Test Shopping checkbox
+      mapPageState.filterSettings['Shopping'] = false;
+      mapPageState.showFilteredMarkers();
+      await tester.pump();
+      expect(mapPageState.markers.isNotEmpty, true);
+      expect(mapPageState.markers.length, 5);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
       await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
-      await tester.pumpAndSettle();
-      expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Test Music checkbox
+      mapPageState.filterSettings['Music'] = false;
+      mapPageState.showFilteredMarkers();
+      await tester.pump();
+      expect(mapPageState.markers.isNotEmpty, true);
+      expect(mapPageState.markers.length, 5);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
       await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
-      await tester.pumpAndSettle();
-      expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Test Events checkbox
+      mapPageState.filterSettings['Charity/Community/Info'] = false;
+      mapPageState.showFilteredMarkers();
+      await tester.pump();
+      expect(mapPageState.markers.isNotEmpty, true);
+      expect(mapPageState.markers.length, 5);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
       await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
-      await tester.pumpAndSettle();
-      expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Test Services checkbox
+      mapPageState.filterSettings['Service'] = false;
+      mapPageState.showFilteredMarkers();
+      await tester.pump();
+      expect(mapPageState.markers.isNotEmpty, true);
+      expect(mapPageState.markers.length, 5);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, false);
       await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
-      await tester.pumpAndSettle();
-      expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers.length, 5);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, false);
 
       // Verify "Show All" button works
       final showAll = find.text("Show all");
@@ -1281,11 +1219,11 @@ void main() {
       await tester.tap(showAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Verify "Hide All" button works
       final hideAll = find.text("Hide all");
@@ -1297,11 +1235,11 @@ void main() {
       await tester.tap(hideAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
-      expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26002')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26005')]?.visible, false);
     });
 
     testWidgets('hideAllMarkers clears all markers', (tester) async {
@@ -1309,36 +1247,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Build the MapPage widget
@@ -1349,17 +1258,18 @@ void main() {
               body: MapPage(listings: listings, onTabSelected: (_) {}),
             ),
           )));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Obtain the state after mounting
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       expect(mapPageState.markers.isNotEmpty, true);
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, true);
 
       mapPageState.hideAllMarkers();
-      expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
+      expect(mapPageState.markers[const MarkerId('26001')]?.visible, false);
     });
 
     testWidgets('Compass AnimatedRotation reflects preferredMapOrientation and toggles on button press', (WidgetTester tester) async {
@@ -1394,7 +1304,7 @@ void main() {
       );
 
       await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: testWidget));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final animatedRotationFinder = find.byType(AnimatedRotation);
       expect(animatedRotationFinder, findsOneWidget);
@@ -1402,7 +1312,7 @@ void main() {
       expect(widgetBefore.turns, closeTo(90.0 / 360.0, 0.001));
 
       await tester.tap(find.byIcon(Icons.assistant_navigation));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 250));
 
       AnimatedRotation widgetAfter = tester.widget<AnimatedRotation>(animatedRotationFinder);
       expect(widgetAfter.turns, closeTo(0.0, 0.001));

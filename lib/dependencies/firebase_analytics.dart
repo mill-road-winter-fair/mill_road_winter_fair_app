@@ -1,10 +1,13 @@
+// App imports
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -174,6 +177,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'performanceOther': 'map_filter_other_performances',
       'performanceChildrens': 'map_filter_childrens',
       'business': 'map_filter_business',
+      'dance': 'map_filter_dance',
+      'other': 'map_filter_other',
+      'childrens': 'map_filter_childrens',
       'visitsExperiences': 'map_filter_visits',
       'services': 'map_filter_services',
     };
@@ -357,6 +363,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'theme': selectedThemeKey,
       'sorting_method': preferredSortingMethod.name,
       'map_type': preferredMapStyleType.name,
+      'map_marker_size': preferredMapMarkerSize.value.name,
+      'home_page_style': staticChooserPage.value ? 'static' : 'animated',
       'map_orientation': preferredMapOrientation.name,
       'road_closure': preferredRoadClosurePolygonVisible.toString(),
     };
@@ -424,7 +432,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(false);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('No thanks'),
+            child: Text('No thanks', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -433,7 +441,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(true);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('I agree'),
+            child: Text('I agree', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
         ],
       ),

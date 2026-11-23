@@ -1,13 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:provider/provider.dart';
+
+// Third-party imports
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 import 'fakes/fake_analytics_service.dart';
@@ -21,23 +26,7 @@ void main() {
     locationServicesEnabled = false;
     await loadSettings();
     listings = [
-      {
-        'id': 'scrollable',
-        'title': 'Listing',
-        'subtitle': 'Stall',
-        'location': 'Mill Road',
-        'groupParent': 'FALSE',
-        'cancelled': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'description': List.filled(150, 'Long details.').join(' '),
-        'email': '',
-        'website': '',
-        'phone': '01223 123456',
-        'imageURL': '',
-        'latLng': '52.199687,0.138813',
-        'startTime': '10:00',
-        'endTime': '23:59',
-      }
+      mockListing('longDescription')
     ];
     await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
         home: FilteredListingsPage(

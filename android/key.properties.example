@@ -1,0 +1,6 @@
+# Release publishers only: copy to key.properties (ignored by Git).
+# Use an absolute path with forward slashes, including on Windows.
+storeFile=C:/path/to/upload-keystore.jks
+storePassword=
+keyAlias=upload
+keyPassword=

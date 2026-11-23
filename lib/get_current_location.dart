@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
+// App imports
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
+import 'package:material_ui/material_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 
 Future<void> establishLocation() async {
   debugPrint('establishLocation called');
