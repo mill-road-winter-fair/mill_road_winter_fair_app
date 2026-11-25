@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
@@ -36,23 +37,33 @@ class WelcomeScreen extends StatelessWidget {
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
     );
 
-    final bool isAuto = selectedThemeKey == 'auto';
-    final ThemeMode resolvedThemeMode = isAuto
-        ? ThemeMode.system
-        : switch (selectedThemeKey) {
-            'dark' => ThemeMode.dark,
-            _ => ThemeMode.light,
-          };
-    mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
-    return MaterialApp(
-      title: 'Welcome screen',
-      debugShowCheckedModeBanner: false,
-      themeMode: resolvedThemeMode,
-      theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? appThemes['light']!,
-      darkTheme: isAuto ? appThemes['dark'] : appThemes['dark'],
-      navigatorObservers: [routeObserver],
-      home: OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished),
+    return ValueListenableBuilder<String>(
+      valueListenable: themeNotifier,
+      builder: (context, selectedThemeKey, _) {
+        debugPrint('MyApp build theme changed: $selectedThemeKey');
+        final bool isAuto = selectedThemeKey == 'auto';
+        final ThemeMode resolvedThemeMode = isAuto
+            ? ThemeMode.system
+            : switch (selectedThemeKey) {
+                'dark' => ThemeMode.dark,
+                _ => ThemeMode.light,
+              };
+        final ThemeData baseTheme = appThemes[getEffectiveThemeKey(selectedThemeKey)] ?? appThemes['light']!;
+        final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
+        mapStyle = getMapStyleForThemeKey(selectedThemeKey);
+        return MaterialApp(
+          title: 'Welcome screen',
+          themeMode: resolvedThemeMode,
+          theme: isAuto
+              ? appThemes['light']
+              : appThemes[selectedThemeKey] ?? baseTheme,
+          darkTheme: isAuto ? appThemes['dark'] : darkTheme,
+          debugShowCheckedModeBanner: false,
+          navigatorObservers: [routeObserver],
+          home: OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished),
+        );
+      }
     );
   }
 }
@@ -74,13 +85,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     await prefs.setBool('firstExecution', false);
   }
 
-  void _onIntroEnd(BuildContext context) {
-    firstExecution = false;
-    _saveSettings();
+  void _onIntroEnd(BuildContext context) async {
+    if (firstExecution) {
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => SettingsPage(analyticsService: widget.analyticsService),
+        ),
+      );
+      firstExecution = false;
+      _saveSettings();
+    }
     if (widget.onFinished != null) {
       widget.onFinished!();
       return;
     }
+    if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => HomePage(analyticsService: widget.analyticsService),
