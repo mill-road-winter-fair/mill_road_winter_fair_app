@@ -136,6 +136,7 @@ void main() {
           expect(toast.right, lessThanOrEqualTo(size.width - 24));
 
           await tester.pump(const Duration(seconds: 2));
+          await tester.pump(const Duration(milliseconds: 400));
           await tester.pumpAndSettle();
 
           expect(tester.takeException(), isNull);
@@ -565,6 +566,7 @@ void main() {
         (_) async => true,
       );
       addTearDown(() {
+        FToast().removeQueuedCustomToasts();
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
           const MethodChannel('PonnamKarthik/fluttertoast'),
           null,
@@ -616,6 +618,8 @@ void main() {
       await settle(tester);
       expect(find.text('Past act'), findsOneWidget);
       await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
     });
   });
 }
