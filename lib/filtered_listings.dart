@@ -848,6 +848,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
                                           widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          widget.analyticsService.logPreferenceSet('listings_category', 'all');
                                           widget.onSubfilterChange(null);
                                         },
                                         icon: const Icon(Icons.filter_alt, size: 28),
