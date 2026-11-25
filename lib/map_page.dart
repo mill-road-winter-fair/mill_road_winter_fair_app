@@ -1739,16 +1739,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       });
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
-      Fluttertoast.showToast(
-        msg: (_isSearching)
+      showInfoToast(context, (_isSearching)
           ? 'Nearest search results are more than 500m away, so please change or cancel your search and try again.'
           : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Colors.white,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
+        isError: true
       );
       widget.cancelMapNearest?.call();
       return;
