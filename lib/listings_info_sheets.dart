@@ -364,8 +364,17 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ? null
                       : () {
                           HapticFeedback.lightImpact();
+                          final wasFavourited = favouriteListingKeys.value.contains(widget.listingId);
                           widget.onFavouriteTapped?.call();
                           widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
+                          final isFavourited = favouriteListingKeys.value.contains(widget.listingId);
+                          if (isFavourited != wasFavourited) {
+                            if (isFavourited) {
+                              widget.analyticsService.logListingSaved(widget.title);
+                            } else {
+                              widget.analyticsService.logListingUnsaved(widget.title);
+                            }
+                          }
                         },
                   padding: const EdgeInsets.all(0),
                   style: ElevatedButton.styleFrom(
