@@ -341,6 +341,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'home_page_style': staticChooserPage.value ? 'static' : 'animated',
       'map_orientation': preferredMapOrientation.name,
       'road_closure': preferredRoadClosurePolygonVisible.toString(),
+      'alert_notice_period_minutes': alertNoticePeriod.toString(),
     };
     for (final entry in properties.entries) {
       await _record(() => analytics.setUserProperty(name: entry.key, value: entry.value));

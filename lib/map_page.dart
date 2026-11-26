@@ -692,13 +692,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   // Function to toggle a listing's presence in the list of favourites
-  void favouriteOrNotListing(String listingID) {
+  void favouriteOrNotListing(String listingID, String listingName) {
     debugPrint('MapPageState favouriteOrNotListing called');
-    if (isListingFavourited(listingID)) {
-      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-    } else {
-      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-    }
+    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
     setState(() {});
     _saveSettings();
   }
@@ -793,13 +789,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   });
                 }
 
-                void favouriteOrNotListing(String listingID) {
+                void favouriteOrNotListing(String listingID, String listingName) {
                   setModalState(() {
-                    if (isListingFavourited(listingID)) {
-                      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                    } else {
-                      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                    }
+                    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
                     _saveSettings();
                   });
                 }
@@ -894,7 +886,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(rel['id']),
-                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id'], rel['title']),
                                               onGetDirections: () {
                                                 Navigator.push(
                                                   context,
@@ -993,13 +985,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
+                    void favouriteOrNotListing(String listingID, String listingName) {
                       setModalState(() {
-                        if (isListingFavourited(listingID)) {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                        } else {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                        }
+                        toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
                         _saveSettings();
                       });
                     }
@@ -1042,7 +1030,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               },
                               onFavouriteTapped: () {
                                 HapticFeedback.lightImpact();
-                                favouriteOrNotListing(listing['id']);
+                                favouriteOrNotListing(listing['id'], listing['title']);
                               },
                               onGetDirections: (navigationInProgress) ? null : () {
                                 Navigator.push(

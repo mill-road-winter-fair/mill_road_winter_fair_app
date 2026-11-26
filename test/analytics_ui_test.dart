@@ -26,6 +26,11 @@ import 'pump_with_clock.dart';
 class RecordingAnalyticsService extends FakeAnalyticsService {
   final calls = <String>[];
   final buttonEvents = <Map<String, String?>>[];
+  final favouriteEvents = <String>[];
+  @override
+  Future<void> logListingSaved(String listingName) async => favouriteEvents.add('saved:$listingName');
+  @override
+  Future<void> logListingUnsaved(String listingName) async => favouriteEvents.add('unsaved:$listingName');
   @override
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
     calls.add('tap:$buttonName');
@@ -68,6 +73,42 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
+
+  for (final inDialog in [false, true]) {
+    testWidgets('favourites log actual changes once (inDialog=$inDialog)', (tester) async {
+      await tester.pumpWithClock(MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
+        listingId: 'listing-123', cancelled: false, brickAndMortar: false,
+        emoji: '', title: 'Listing', subtitle: '', location: '', description: '',
+        email: '', website: '', phoneNumber: '', imageURL: '',
+        startTime: '', endTime: '', approxDistance: '', detailsVisible: false,
+        listingFavourited: false, listingAlerted: false, inDialog: inDialog,
+        onGetDirections: () {}, analyticsService: analytics, colorScheme: const ColorScheme.light(),
+        onFavouriteTapped: () {
+          toggleListingFavourite('listing-123', 'Listing', analyticsService: analytics);
+        },
+      ))));
+      // Tap twice without rebuilding: analytics must use the actual saved state.
+      await tester.tap(find.byTooltip('Add to favourites'));
+      await tester.tap(find.byTooltip('Add to favourites'));
+      expect(analytics.favouriteEvents, ['saved:Listing', 'unsaved:Listing']);
+      expect(favouriteListingKeys.value, isEmpty);
+    });
+  }
+
+  for (final cancelled in [false, true]) {
+    testWidgets('no favourite events without a change (cancelled=$cancelled)', (tester) async {
+      await tester.pumpWithClock(MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
+        listingId: 'listing-123', cancelled: cancelled, brickAndMortar: false,
+        emoji: '', title: 'Listing', subtitle: '', location: '', description: '',
+        email: '', website: '', phoneNumber: '', imageURL: '',
+        startTime: '', endTime: '', approxDistance: '', detailsVisible: false,
+        listingFavourited: false, listingAlerted: false, inDialog: false,
+        onGetDirections: () {}, analyticsService: analytics, colorScheme: const ColorScheme.light(),
+      ))));
+      await tester.tap(find.byTooltip('Add to favourites'));
+      expect(analytics.favouriteEvents, isEmpty);
+    });
+  }
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
