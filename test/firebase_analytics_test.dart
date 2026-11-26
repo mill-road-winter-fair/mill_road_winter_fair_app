@@ -80,6 +80,8 @@ void main() {
       await service.logRoadClosurePolygonPreferenceSet(false);
       await service.logDistanceUnitPreferenceSet('imperial');
       await service.logThemePreferenceSet('dark');
+      await service.logAlertNoticePeriodPreferenceSet(30);
+      await service.syncPreferences();
       await service.logPreferenceSet('sorting_method', 'alphabetical');
       await service.logListingSaved('Listing');
       await service.logListingUnsaved('Listing');
@@ -113,9 +115,13 @@ void main() {
   test('saved opt-in restores properties without fabricating changes or an Unknown screen', () async {
     usageAnalyticsEnabled = true;
     selectedThemeKey = 'dark';
+    final previousNoticePeriod = alertNoticePeriod;
+    addTearDown(() => alertNoticePeriod = previousNoticePeriod);
+    alertNoticePeriod = 30;
     await service.initialize();
     expect(sdk.calls, ['collection:false', 'consent:true', 'collection:true']);
     expect(sdk.properties['theme'], 'dark');
+    expect(sdk.properties['alert_notice_period_minutes'], '30');
     expect(sdk.events, isEmpty);
   });
 
@@ -127,6 +133,7 @@ void main() {
     expect(sdk.properties['distance_unit'], 'metric');
     expect(sdk.properties['sorting_method'], 'nearest');
     expect(sdk.properties['usage_analytics'], 'enabled');
+    expect(sdk.properties['alert_notice_period_minutes'], alertNoticePeriod.toString());
     await service.logButtonTapped('theme_preference_option');
     expect(sdk.events.last['parameters'], {'button_id': 'theme_preference_option', 'screen_name': 'SettingsPage'});
   });
@@ -164,6 +171,16 @@ void main() {
       'name': 'search',
       'parameters': {'search_term': 'Mulled Wine', 'search_area': 'listings'},
     });
+  });
+
+  test('saved and unsaved events carry the listing name', () async {
+    usageAnalyticsEnabled = true;
+    await service.logListingSaved('Listing');
+    await service.logListingUnsaved('Listing');
+    expect(sdk.events, [
+      {'name': 'listing_saved', 'parameters': {'listing_name': 'Listing'}},
+      {'name': 'listing_unsaved', 'parameters': {'listing_name': 'Listing'}},
+    ]);
   });
 
   test('notice impressions identify the notice and current screen', () async {
