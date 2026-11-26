@@ -383,7 +383,7 @@ class TimetablePageState extends State<TimetablePage> {
             Flexible(
               fit: FlexFit.loose,
               child: AutoSizeText(
-                '${pe.name}\u{00AD}',
+                pe.name,
                 style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
                 maxLines: maxLines,
                 minFontSize: minTitleFontSize,
