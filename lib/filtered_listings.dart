@@ -312,13 +312,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   // Function to toggle the listing's presence in the list of favourites
-  void favouriteOrNotListing(String listingID) {
+  void favouriteOrNotListing(String listingID, String listingName) {
     if (isListingFavourited(listingID)) {
       if (filterCategory == 'favourite' && detailsVisibleIndex != null && filteredListings[detailsVisibleIndex!]['id'] == listingID) detailsVisibleIndex = null;
-      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-    } else {
-      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
+    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
     setState(() {});
     _saveSettings();
   }
@@ -709,7 +707,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(listing['id']),
                                               onDetailsTapped: () => toggleDetailsRow(index),
-                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id'], listing['title']),
                                               onGetDirections: () {
                                                 Navigator.push(
                                                   context,

@@ -84,9 +84,7 @@ void main() {
         listingFavourited: false, listingAlerted: false, inDialog: inDialog,
         onGetDirections: () {}, analyticsService: analytics, colorScheme: const ColorScheme.light(),
         onFavouriteTapped: () {
-          final favourites = {...favouriteListingKeys.value};
-          if (!favourites.remove('listing-123')) favourites.add('listing-123');
-          favouriteListingKeys.value = favourites;
+          toggleListingFavourite('listing-123', 'Listing', analyticsService: analytics);
         },
       ))));
       // Tap twice without rebuilding: analytics must use the actual saved state.

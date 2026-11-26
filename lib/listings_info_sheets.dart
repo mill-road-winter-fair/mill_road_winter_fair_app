@@ -364,17 +364,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ? null
                       : () {
                           HapticFeedback.lightImpact();
-                          final wasFavourited = favouriteListingKeys.value.contains(widget.listingId);
                           widget.onFavouriteTapped?.call();
                           widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
-                          final isFavourited = favouriteListingKeys.value.contains(widget.listingId);
-                          if (isFavourited != wasFavourited) {
-                            if (isFavourited) {
-                              widget.analyticsService.logListingSaved(widget.title);
-                            } else {
-                              widget.analyticsService.logListingUnsaved(widget.title);
-                            }
-                          }
                         },
                   padding: const EdgeInsets.all(0),
                   style: ElevatedButton.styleFrom(
@@ -719,7 +710,7 @@ Future<void> showListingDetailsDialog(
                     listingAlerted: alertsStore.alertExists(event.id),
                     onFavouriteTapped: () {
                       HapticFeedback.lightImpact();
-                      favouriteOrNotListing(event);
+                      favouriteOrNotListing(event, analyticsService: analyticsService);
                       setStateFunction.call;
                       setStateDialog(() {});
                     },
@@ -759,16 +750,27 @@ void safeRemoveRoute(BuildContext context, Route? route) {
   }
 }
 
-void favouriteOrNotListing(PositionedEvent theEvent) {
-  if (favouriteListingKeys.value.contains(theEvent.id)) {
-    favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
-  } else {
-    favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
-  }
+void favouriteOrNotListing(PositionedEvent theEvent, {required AnalyticsService analyticsService}) {
+  toggleListingFavourite(theEvent.id, theEvent.name, analyticsService: analyticsService);
   _saveFavourites();
 }
 
 Future<void> _saveFavourites() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+}
+
+// Changes the saved state and records the corresponding domain event
+// Callers remain responsible for persistence and refreshing their view
+void toggleListingFavourite(String listingId, String listingName, {required AnalyticsService analyticsService}) {
+  final favourites = {...favouriteListingKeys.value};
+  final wasFavourited = favourites.remove(listingId);
+  if (!wasFavourited) favourites.add(listingId);
+  favouriteListingKeys.value = favourites;
+
+  if (wasFavourited) {
+    analyticsService.logListingUnsaved(listingName);
+  } else {
+    analyticsService.logListingSaved(listingName);
+  }
 }
