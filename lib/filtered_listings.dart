@@ -314,13 +314,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   // Function to toggle the listing's presence in the list of favourites
-  void favouriteOrNotListing(String listingID) {
+  void favouriteOrNotListing(String listingID, String listingName) {
     if (isListingFavourited(listingID)) {
       if (filterCategory == 'favourite' && detailsVisibleIndex != null && filteredListings[detailsVisibleIndex!]['id'] == listingID) detailsVisibleIndex = null;
-      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-    } else {
-      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
+    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
     setState(() {});
     _saveSettings();
   }
@@ -711,7 +709,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(listing['id']),
                                               onDetailsTapped: () => toggleDetailsRow(index),
-                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id'], listing['title']),
                                               onGetDirections: () {
                                                 Navigator.push(
                                                   context,
@@ -840,8 +838,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             _isSearching = false;
                                           });
                                         },
-                                        icon: const Icon(Icons.search_off, size: 32),
-                                        label: const Text('Clear and close search'),
+                                        icon: const Icon(Icons.search_off, size: 28),
+                                        label: const Text('Clear and close search', style: TextStyle(height: 1.1)),
                                       ),
                                     ],
                                     if (widget.subfilterCategory != null) ...[
@@ -850,10 +848,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
                                           widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          widget.analyticsService.logPreferenceSet('listings_category', 'all');
                                           widget.onSubfilterChange(null);
                                         },
-                                        icon: const Icon(Icons.filter_alt, size: 32),
-                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                        icon: const Icon(Icons.filter_alt, size: 28),
+                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything', style: const TextStyle(height: 1.1)),
                                       ),
                                     ],
                                     if (filterCategory == 'favourite') ...[
@@ -864,8 +863,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
                                           widget.onTabSelected(3); // in future, this could preserve search as well
                                         },
-                                        icon: const Icon(Icons.ballot, size: 32),
-                                        label: const Text('View all listings, not just Favourites'),
+                                        icon: const Icon(Icons.ballot, size: 28),
+                                        label: const Text('View all listings, not just Favourites', style: TextStyle(height: 1.1)),
                                       ),
                                     ],
                                   ],

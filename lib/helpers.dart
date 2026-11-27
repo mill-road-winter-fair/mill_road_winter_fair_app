@@ -266,7 +266,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => AboutTheFairPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -285,7 +287,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => ImportantInfoPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -431,7 +435,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => SettingsPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -445,12 +451,15 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 analyticsService.logButtonTapped('drawer_app_guide');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
-                Navigator.pushReplacement(
+                Navigator.push(
                     navigatorContext,
                     MaterialPageRoute(
                         builder: (context) => WelcomeScreen(
                               analyticsService: analyticsService,
-                            )));
+                              onFinished: () => Navigator.pop(context),
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -1080,6 +1089,28 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
       final distanceMilesRounded = (distanceMetres / 1609.34).toStringAsFixed(2);
       distanceToDestination = '$distanceMilesRounded miles';
     }
+  } else if (preferredDistanceUnits == DistanceUnits.british) {
+    if (distanceMetres < 403) {
+      distanceToDestination = '${(distanceMetres / 10).round() * 10}m';
+    } else {
+      final quarterMiles = (distanceMetres / 1609.344 * 4).round();
+      final miles = quarterMiles ~/ 4;
+      final fraction = quarterMiles % 4;
+      if (fraction == 0) {
+        distanceToDestination = '$miles mile${(miles == 1) ? '' : 's'}';
+      } else {
+        final fractionText = switch (fraction) {
+          1 => '¼',
+          2 => '½',
+          3 => '¾',
+          _ => '',
+        };
+        distanceToDestination = '${(miles == 0) ? '' : miles}$fractionText mile${(miles >= 1) ? 's' : ''}';
+      }
+    }
+  } else if (preferredDistanceUnits == DistanceUnits.walking) {
+    final minutes = (distanceMetres / 70).round(); // 70m/min through busy shopping area
+    distanceToDestination = '$minutes mins';
   } else if (preferredDistanceUnits == DistanceUnits.cambridge) {
     final puntLengths = (distanceMetres / 4).toStringAsFixed(0);
     distanceToDestination = '$puntLengths punts';
@@ -1315,7 +1346,9 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     final timeToGo = theListingStart.difference(now).inMinutes;
     int theAlertNoticePeriod;
     if (timeToGo <= 0) {
-      showToast(context, 'No alert set as ${theListing['title']} is already underway.', true);
+      final theListingEnd = combineDateAndTime(theListing['endTime'], fairDate);
+      final timeLeft = theListingEnd.difference(now).inMinutes;
+      showToast(context, 'No alert set as ${theListing['title']} ${(timeLeft < 0) ? 'has finished' : 'is already underway'}.', true);
       return;
     } else if (timeToGo < desiredNoticePeriod) {
       theAlertNoticePeriod = max(timeToGo ~/ 1.5, 1); // arbitrary value if within desiredNoticePeriod of start
@@ -1365,8 +1398,8 @@ void showToast(BuildContext theContext, String theMessage, bool isError) {
   Fluttertoast.showToast(
     msg: theMessage,
     gravity: ToastGravity.BOTTOM,
-    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
-    textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Colors.white,
+    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.onError : Theme.of(theContext).colorScheme.primary,
+    textColor: (isError) ? Theme.of(theContext).colorScheme.error : Colors.white,
     fontSize: 16,
     toastLength: Toast.LENGTH_SHORT,
     timeInSecForIosWeb: 2,
@@ -1419,7 +1452,7 @@ class AdaptiveImageText extends StatefulWidget {
 
 class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   static const double _inlineImageWidth = 160;
-  static const double _maxImageHeight = 180;
+  static const double _maxImageHeight = 160;
   static const double _loadingImageHeight = 120;
 
   Future<ui.Image>? _imageFuture;
@@ -1465,7 +1498,7 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
         if (snapshot.hasError) return _buildFallbackLayout(showErrorText: true);
         if (!snapshot.hasData) return _buildLoadingLayout();
         final image = snapshot.data!;
-        final imageIsLandscape = image.width > image.height;
+        final imageIsLandscape = image.width > (image.height * 1.2); // so nearly-square images still appear to the side, to waste less space
         return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
       },
     );

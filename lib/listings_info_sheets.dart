@@ -24,6 +24,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String endTime;
   final String approxDistance;
   final ColorScheme colorScheme;
+  final String description;
   final AnalyticsService analyticsService;
 
   const GroupListingInfoSheet({
@@ -34,6 +35,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.endTime,
     required this.approxDistance,
     required this.colorScheme,
+    required this.description,
     required this.analyticsService,
     super.key,
   });
@@ -78,8 +80,8 @@ class GroupListingInfoSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
-              if (!brickAndMortar) Expanded(
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              Expanded(
                 flex: 7,
                 child: Text(
                   "$startTime—$endTime",
@@ -89,7 +91,7 @@ class GroupListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          // const SizedBox(height: 8),
+          if (description.isNotEmpty) Text(description, style: const TextStyle(fontSize: 16, color: Colors.white)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 8,
@@ -481,7 +483,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
             // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
+            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 12),
             if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
           ],
         ),
@@ -708,7 +710,7 @@ Future<void> showListingDetailsDialog(
                     listingAlerted: alertsStore.alertExists(event.id),
                     onFavouriteTapped: () {
                       HapticFeedback.lightImpact();
-                      favouriteOrNotListing(event);
+                      favouriteOrNotListing(event, analyticsService: analyticsService);
                       setStateFunction.call;
                       setStateDialog(() {});
                     },
@@ -748,16 +750,27 @@ void safeRemoveRoute(BuildContext context, Route? route) {
   }
 }
 
-void favouriteOrNotListing(PositionedEvent theEvent) {
-  if (favouriteListingKeys.value.contains(theEvent.id)) {
-    favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
-  } else {
-    favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
-  }
+void favouriteOrNotListing(PositionedEvent theEvent, {required AnalyticsService analyticsService}) {
+  toggleListingFavourite(theEvent.id, theEvent.name, analyticsService: analyticsService);
   _saveFavourites();
 }
 
 Future<void> _saveFavourites() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+}
+
+// Changes the saved state and records the corresponding domain event
+// Callers remain responsible for persistence and refreshing their view
+void toggleListingFavourite(String listingId, String listingName, {required AnalyticsService analyticsService}) {
+  final favourites = {...favouriteListingKeys.value};
+  final wasFavourited = favourites.remove(listingId);
+  if (!wasFavourited) favourites.add(listingId);
+  favouriteListingKeys.value = favourites;
+
+  if (wasFavourited) {
+    analyticsService.logListingUnsaved(listingName);
+  } else {
+    analyticsService.logListingSaved(listingName);
+  }
 }

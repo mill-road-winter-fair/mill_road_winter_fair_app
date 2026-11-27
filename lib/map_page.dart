@@ -14,7 +14,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
@@ -204,6 +203,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
   Animation<double> dotPulse = const AlwaysStoppedAnimation<double>(1.0); // for the user's location dot on iOS
   AnimationController? dotPulseController; // for the user's location dot on iOS
+  bool showingNearest = false; // when asked to show nearby attractions
+  bool autoCameraMove = false; // if camera movement has been initiated by app, rather than user
 
   void _setDotPulseVisible(bool isVisible) {
     final controller = dotPulseController;
@@ -241,9 +242,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       if (!mounted) return;
-      ListingUpdateNotifier.maybeShowNotice(context,
-          analyticsService: widget.analyticsService,
-          allowListingsMayChange: widget.allowListingsMayChangeNotice);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!);
@@ -694,13 +692,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   // Function to toggle a listing's presence in the list of favourites
-  void favouriteOrNotListing(String listingID) {
+  void favouriteOrNotListing(String listingID, String listingName) {
     debugPrint('MapPageState favouriteOrNotListing called');
-    if (isListingFavourited(listingID)) {
-      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-    } else {
-      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-    }
+    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
     setState(() {});
     _saveSettings();
   }
@@ -795,13 +789,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   });
                 }
 
-                void favouriteOrNotListing(String listingID) {
+                void favouriteOrNotListing(String listingID, String listingName) {
                   setModalState(() {
-                    if (isListingFavourited(listingID)) {
-                      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                    } else {
-                      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                    }
+                    toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
                     _saveSettings();
                   });
                 }
@@ -842,6 +832,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
                                 colorScheme: colorScheme,
+                                description: parentListing['description'] ?? '',
                                 analyticsService: widget.analyticsService,
                               ),
                             ),
@@ -895,7 +886,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(rel['id']),
-                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id'], rel['title']),
                                               onGetDirections: () {
                                                 Navigator.push(
                                                   context,
@@ -953,6 +944,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     final type = getCategory(listing);
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
+    bool detailsVisible = false;
 
     Marker newMarker = Marker(
         markerId: markerId,
@@ -993,13 +985,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
+                    void favouriteOrNotListing(String listingID, String listingName) {
                       setModalState(() {
-                        if (isListingFavourited(listingID)) {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                        } else {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                        }
+                        toggleListingFavourite(listingID, listingName, analyticsService: widget.analyticsService);
                         _saveSettings();
                       });
                     }
@@ -1016,7 +1004,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         child: SingleChildScrollView(
                           controller: specificSheetModalScrollController,
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 20),
                             child: SpecificListingInfoSheet(
                               listingId: listing['id'],
                               cancelled: listing['cancelled'] == 'TRUE' ? true : false,
@@ -1033,10 +1021,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               startTime: "${listing['startTime']}",
                               endTime: "${listing['endTime']}",
                               approxDistance: distanceMessage,
-                              detailsVisible: true,
+                              detailsVisible: detailsVisible,
                               listingFavourited: isListingFavourited(listing['id']),
                               listingAlerted: alertsStore.alertExists(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onDetailsTapped: () {
+                                HapticFeedback.lightImpact();
+                                setModalState(() { detailsVisible = !detailsVisible; });
+                              },
+                              onFavouriteTapped: () {
+                                HapticFeedback.lightImpact();
+                                favouriteOrNotListing(listing['id'], listing['title']);
+                              },
                               onGetDirections: (navigationInProgress) ? null : () {
                                 Navigator.push(
                                   context,
@@ -1771,6 +1766,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         ),
       ),
     );
+    setState(() {
+      autoCameraMove = true;
+      showingNearest = true;
+    });
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -2108,7 +2107,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         return FairScaffold(
           appBarTitle:
               (navigationInProgress || doingAPushNavigation != null) ? 'Directions'
-              : (widget.nearestMarkerCount != null) ? 'Nearby attractions'
+              : (showingNearest) ? 'Nearby attractions'
               : (hasActiveMarkerFilters) ? 'Map (filtered)'
               : 'Map',
           currentTab: 1,
@@ -2231,6 +2230,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             onCameraMove: (CameraPosition position) {
                               //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
                               _currentCamera = position;
+                              if (!autoCameraMove) showingNearest = false;
                               setState(() {
                                 switch (preferredMapOrientation) {
                                   case MapOrientation.adaptive:
@@ -2241,6 +2241,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                     break;
                                 }
                               });
+                            },
+                            onCameraIdle: () {
+                              autoCameraMove = false;
                             },
                             polygons: _polygons,
                             markers: markers.values.toSet(),
@@ -2267,6 +2270,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
                           widget.cancelMapNearest?.call();
+                          showingNearest = false;
                           enableAllFiltersIfAllOff();
                           _setMapCameraToFitMapMarkers();
                         },

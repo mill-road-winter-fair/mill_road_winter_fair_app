@@ -20,6 +20,7 @@ void main() {
   });
 
   setUp(() {
+    firstExecution = false;
     selectedThemeKey = 'light';
     themeNotifier.value = 'light';
     preferredDistanceUnits = DistanceUnits.metric;
@@ -32,17 +33,17 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Verify the Distance Units section
-      expect(find.text('Distances:'), findsOneWidget);
+      expect(find.text('Units'), findsOneWidget);
       expect(find.text('Metric'), findsOneWidget);
 
       // Verify the Theme section
-      expect(find.text('Theme:'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Light'), findsOneWidget);
 
       // Verify default settings
       expect(preferredDistanceUnits, DistanceUnits.metric);
       expect(themeNotifier.value, 'light');
-      expect(find.text('Map markers:'), findsOneWidget);
+      expect(find.text('Map markers'), findsOneWidget);
       expect(find.text('Medium'), findsOneWidget);
       expect(preferredMapMarkerSize.value.dimension, 32.0);
     });

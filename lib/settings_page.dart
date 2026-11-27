@@ -57,7 +57,7 @@ Future<void> loadSettings() async {
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     // Set default distance unit as metric (0 in the index)
-    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0;
+    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 3;
     // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
@@ -186,8 +186,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    final settingTitleStyle = const TextStyle(fontSize: 15);
+    final colorScheme = Theme.of(context).colorScheme;
+    final settingLabelStyle = TextStyle(fontSize: 16, color: colorScheme.onSecondary);
+    final settingTitleStyle = TextStyle(fontSize: 15, color: colorScheme.onSecondary);
+    final settingDescriptorStyle = TextStyle(fontSize: 15, color: colorScheme.tertiary, fontWeight: FontWeight.bold);
     const dropdownDecoration = InputDecorationTheme(
       enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 0.5)),
       isDense: true,
@@ -196,11 +198,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
     );
-    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
+      DropdownOption(title: 'British', subtitle: 'Metres and miles', value: DistanceUnits.british),
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
       DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
-      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge)
+      DropdownOption(title: 'Walking time', subtitle: 'Minutes at a leisurely pace', value: DistanceUnits.walking),
+      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge),
     ];
     final List<DropdownOption> themeOptions = [
       DropdownOption(title: 'Auto', subtitle: 'Follow the device light/dark setting', value: 'auto'),
@@ -215,6 +219,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: 'Animated', subtitle: 'Spotlights the Fair’s offerings', value: false),
       DropdownOption(title: 'Static', subtitle: 'Stays boringly fixed', value: true),
     ];
+    final List<DropdownOption> analyticsOptions = [
+      DropdownOption(title: 'Share', subtitle: 'Allow Google and the Fair to see your activity', value: true),
+      DropdownOption(title: 'Don’t share', subtitle: 'Keep your activity private', value: false),
+    ];
     return SafeArea(
       top: false,
       left: false,
@@ -227,9 +235,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
             widget.analyticsService.logButtonTapped('back');
             Navigator.maybePop(context);
           }) : null,
-          title: const FittedBox(
+          title: FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text('Settings'),
+            child: Text((firstExecution) ? 'Make the app your own' : 'Settings'),
           ),
         ),
         body: Container(
@@ -244,248 +252,264 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
               primary: false,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
                 children: [
-                  Table(
-                    // Share the label width while dropdowns fill the remaining space.
-                    columnWidths: const {
-                      0: IntrinsicColumnWidth(),
-                      1: FlexColumnWidth(),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: [
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Theme:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<String>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: themeNotifier.value,
-                          hintText: 'Select a visual theme',
-                          alignmentOffset: const Offset(-15, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: themeOptions.map((opt) {
-                            return DropdownMenuEntry<String>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
+                  if (firstExecution) ...[
+                    Text('Please customise the app to your preferences, then tap ‘Done’ below.', style: settingLabelStyle, textAlign: TextAlign.center),
+                    const SizedBox.shrink(),
+                  ],
+                  Text('Choose a visual colour scheme', style: settingDescriptorStyle),
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Theme', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<String>(
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: themeNotifier.value,
+                      hintText: 'Select a visual colour scheme',
+                      alignmentOffset: const Offset(-15, -60),
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: themeOptions.map((opt) {
+                        return DropdownMenuEntry<String>(
+                          value: opt.value,
+                          label: opt.title,
+                          labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const SizedBox(height: 4),
+                            Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                          ]),
+                        );
+                      }).toList(),
+                      onSelected: (value) {
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('theme_preference_option');
+                        if (value == null) return;
+                        widget.analyticsService.logThemePreferenceSet(value);
+                        selectedThemeKey = value;
+                        setState(() {
+                          _changeTheme(value);
+                          mapStyle = getMapStyleForThemeKey(value);
+                        });
+                        _saveSettings();
+                      },
+                    )),
+                  ]),
+                  const SizedBox(height: 2),
+                  Text('When would you like event alerts?', style: settingDescriptorStyle),
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Notify me', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<int>(
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: alertNoticePeriod,
+                      hintText: 'Select notice period for alerts',
+                      alignmentOffset: const Offset(0, -60),
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: alertNoticePeriods.map((opt) {
+                        final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
+                        return DropdownMenuEntry<int>(
+                          value: opt,
+                          label: theLabel,
+                          labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                        );
+                      }).toList(),
+                      onSelected: (int? value) {
+                        if (value == null) return;
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('alerts_preference_option');
+                        widget.analyticsService.logAlertNoticePeriodPreferenceSet(value);
+                        saveAlertNoticePeriod(value);
+                        setState(() { });
+                      },
+                    )),
+                  ]),
+                  const SizedBox(height: 2),
+                  Text('How should distance to locations appear?', style: settingDescriptorStyle),
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Units', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<DistanceUnits>(
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: preferredDistanceUnits,
+                      hintText: 'Select units for map distances',
+                      alignmentOffset: const Offset(0, -60),
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: unitsOptions.map((opt) {
+                        return DropdownMenuEntry<DistanceUnits>(
+                          value: opt.value,
+                          label: opt.title,
+                          labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const SizedBox(height: 4),
+                            Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                          ]),
+                        );
+                      }).toList(),
+                      onSelected: (DistanceUnits? value) {
+                        if (value == null) return;
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                        widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
+                        setState(() {
+                          preferredDistanceUnits = value;
+                        });
+                        _saveSettings();
+                      },
+                    )),
+                  ]),
+                  const SizedBox(height: 2),
+                  Text('Select the size of markers on the map', style: settingDescriptorStyle),
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Map markers', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<MapMarkerSize>(
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: preferredMapMarkerSize.value,
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: MapMarkerSize.values.map((size) {
+                        return DropdownMenuEntry<MapMarkerSize>(
+                          value: size,
+                          label: size.label,
+                          labelWidget: Text(size.label, style: settingTitleStyle),
+                        );
+                      }).toList(),
+                      onSelected: (value) {
+                        if (value == null) return;
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('map_marker_size_preference_option');
+                        widget.analyticsService.logPreferenceSet('map_marker_size', value.name);
+                        setState(() {
+                          preferredMapMarkerSize.value = value;
+                        });
+                        _saveSettings();
+                      },
+                    )),
+                  ]),
+                  const SizedBox(height: 2),
+                  Text('Should the home page be animated?', style: settingDescriptorStyle),
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Home page', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<bool>(
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: staticChooserPage.value,
+                      hintText: 'Select style of home page',
+                      alignmentOffset: const Offset(0, -60),
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: homePageOptions.map((opt) {
+                        return DropdownMenuEntry<bool>(
+                          value: opt.value,
+                          label: opt.title,
+                          labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const SizedBox(height: 4),
+                            Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                          ]),
+                        );
+                      }).toList(),
+                      onSelected: (bool? value) {
+                        if (value == null) return;
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('home_page_preference_option');
+                        widget.analyticsService.logPreferenceSet('home_page_style', value ? 'static' : 'animated');
+                        setState(() {
+                          staticChooserPage.value = value;
+                        });
+                        _saveSettings();
+                      },
+                    )),
+                  ]),
+                  const SizedBox(height: 2),
+                  RichText(
+                    textScaler: MediaQuery.textScalerOf(context),
+                    textAlign: TextAlign.left,
+                    text: TextSpan(children: [
+                      TextSpan(text: (analyticsEnabledForBuild) ? 'Will you share your app usage?  ' : 'Analytics disabled for dev  ', 
+                          style: settingDescriptorStyle),
+                      TextSpan(
+                        text: 'What’s this?',
+                        style: settingDescriptorStyle.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.normal),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                              ),
                             );
-                          }).toList(),
-                          onSelected: (value) {
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('theme_preference_option');
-                            if (value == null) return;
-                            widget.analyticsService.logThemePreferenceSet(value);
-                            selectedThemeKey = value;
-                            setState(() {
-                              _changeTheme(value);
-                              mapStyle = getMapStyleForThemeKey(value);
-                            });
-                            _saveSettings();
                           },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Alerts:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<int>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: alertNoticePeriod,
-                          hintText: 'Select notice period for alerts',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: alertNoticePeriods.map((opt) {
-                            final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
-                            return DropdownMenuEntry<int>(
-                              value: opt,
-                              label: theLabel,
-                              labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                            );
-                          }).toList(),
-                          onSelected: (int? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('alerts_preference_option');
-                            widget.analyticsService.logAlertNoticePeriodPreferenceSet(value);
-                            saveAlertNoticePeriod(value);
-                            setState(() { });
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Distances:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<DistanceUnits>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: preferredDistanceUnits,
-                          hintText: 'Select units for map distances',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: unitsOptions.map((opt) {
-                            return DropdownMenuEntry<DistanceUnits>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
-                            );
-                          }).toList(),
-                          onSelected: (DistanceUnits? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
-                            setState(() {
-                              preferredDistanceUnits = value;
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Map markers:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<MapMarkerSize>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: preferredMapMarkerSize.value,
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: MapMarkerSize.values.map((size) {
-                            return DropdownMenuEntry<MapMarkerSize>(
-                              value: size,
-                              label: size.label,
-                              labelWidget: Text(size.label, style: settingTitleStyle),
-                            );
-                          }).toList(),
-                          onSelected: (value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('map_marker_size_preference_option');
-                            widget.analyticsService.logPreferenceSet('map_marker_size', value.name);
-                            setState(() {
-                              preferredMapMarkerSize.value = value;
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Home page:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<bool>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: staticChooserPage.value,
-                          hintText: 'Select style of home page',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: homePageOptions.map((opt) {
-                            return DropdownMenuEntry<bool>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
-                            );
-                          }).toList(),
-                          onSelected: (bool? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('home_page_preference_option');
-                            widget.analyticsService.logPreferenceSet('home_page_style', value ? 'static' : 'animated');
-                            setState(() {
-                              staticChooserPage.value = value;
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
-                    ],
+                      ),
+                    ]),
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    activeThumbColor: Theme.of(context).colorScheme.tertiary,
-                    title: Text('Allow analytics', style: settingLabelStyle),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          analyticsEnabledForBuild
-                              ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
-                              : 'Analytics is disabled for this development run.',
-                        ),
-                        const SizedBox(height: 4),
-                        RichText(
-                          text: TextSpan(
-                            text: 'What does this mean?',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
-                                  ),
-                                );
-                              },
-                          ),
-                        ),
-                      ],
-                    ),
-                    value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
-                    onChanged: analyticsEnabledForBuild
-                        ? (bool value) async {
-                      HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                      await widget.analyticsService.setAnalyticsEnabled(value);
-                      if (mounted) setState(() {});
-                    }
+                  Row(children: [
+                    Expanded(flex: 3, child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: Text('Analytics', style: settingLabelStyle, textAlign: TextAlign.end),
+                    )),
+                    Expanded(flex: 5, child: DropdownMenu<bool>(
+                      enabled: analyticsEnabledForBuild,
+                      inputDecorationTheme: dropdownDecoration,
+                      initialSelection: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
+                      hintText: 'Share usage data with us and Google',
+                      alignmentOffset: const Offset(0, -60),
+                      expandedInsets: EdgeInsets.zero,
+                      trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                      dropdownMenuEntries: analyticsOptions.map((opt) {
+                        return DropdownMenuEntry<bool>(
+                          value: opt.value,
+                          label: opt.title,
+                          labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const SizedBox(height: 4),
+                            Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                          ]),
+                        );
+                      }).toList(),
+                      onSelected: (analyticsEnabledForBuild)
+                          ? (bool? value) async {
+                            if (value != null) {
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                              await widget.analyticsService.setAnalyticsEnabled(value);
+                              if (mounted) setState(() {});
+                            }
+                          }
                         : null,
-                  )
+                    )),
+                  ]),
+                  if (firstExecution) ...[
+                    const SizedBox(height: 2),
+                    Align(alignment: AlignmentGeometry.center, child: ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('firstsettings_done');
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.check_circle),
+                      label: const Text('Done'),
+                    )),
+                  ],
                 ],
               ),
             ),

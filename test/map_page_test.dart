@@ -47,6 +47,35 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('reopening the app guide preserves map filters', (tester) async {
+      final originalRoadClosureVisibility = preferredRoadClosurePolygonVisible;
+      addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
+      firstExecution = false;
+      await tester.pumpWithClock(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hide all'));
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(state.filterSettings.values, everyElement(isFalse));
+
+      tester.state<ScaffoldState>(find.byType(Scaffold).first).openDrawer();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('App guide'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take me back to the Fair!'));
+      await tester.pumpAndSettle();
+
+      expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
+      expect(state.filterSettings.values, everyElement(isFalse));
+      expect(tester.takeException(), isNull);
+    });
+
     for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
       testWidgets('filter menu adapts to available height on $platform', (tester) async {
         firstExecution = false;
@@ -771,6 +800,7 @@ void main() {
     testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
+      preferredDistanceUnits = DistanceUnits.metric;
 
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
@@ -843,7 +873,6 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Mortimer Road (~135m away)'), findsOneWidget);
-      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     });
 
