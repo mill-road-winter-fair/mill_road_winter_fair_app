@@ -143,16 +143,18 @@ class FairScaffold extends StatelessWidget {
   }
 }
 
-// We typically use this for non-error toasts as it not in the centre of the screen, but also avoids the navbar
-void showInfoToast(BuildContext context, String message) {
+// We typically use this for toasts as it not in the centre of the screen, but also avoids the navbar
+void showInfoToast(BuildContext context, String message, {bool? isError}) {
   final theme = Theme.of(context);
   final colours = theme.colorScheme;
   final toast = FToast().init(context);
+  final theDuration = (message.length / 25).toInt() + 2;
   // Replace stale feedback when filters change rapidly.
+  debugPrint('${message.length}');
   toast.removeQueuedCustomToasts();
   toast.showToast(
     ignorePointer: true,
-    toastDuration: const Duration(seconds: 2),
+    toastDuration: Duration(seconds: theDuration),
     positionedToastBuilder: (context, child, gravity) {
       final media = MediaQuery.of(context);
       const navigationHeight = FairScaffold.navigationBarHeight +
@@ -170,11 +172,11 @@ void showInfoToast(BuildContext context, String message) {
         key: const ValueKey('filter-toast'),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: colours.primary,
+          color: (isError ?? false) ? colours.error : colours.primary,
           borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
         ),
         child: Text(message, textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 16)),
+            style: TextStyle(color: (isError ?? false) ? colours.onError : Colors.white, fontSize: 16)),
       ),
     ),
   );

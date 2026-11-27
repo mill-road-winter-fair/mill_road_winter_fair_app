@@ -66,6 +66,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.grey[700],
+    ),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -103,6 +106,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.white,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.grey[300],
+    ),
   ),
   '2025': ThemeData(
     useMaterial3: true,
@@ -136,6 +142,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.grey[700],
+    ),
   ),
   '2024': ThemeData(
     useMaterial3: true,
@@ -169,6 +178,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.grey[700],
+    ),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -207,6 +219,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.white,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: Colors.yellow,
+    ),
 ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
@@ -240,6 +255,9 @@ final Map<String, ThemeData> appThemes = {
       iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.grey[700],
+    ),
 ),
 };
 
