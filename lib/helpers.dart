@@ -1091,6 +1091,28 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
       final distanceMilesRounded = (distanceMetres / 1609.34).toStringAsFixed(2);
       distanceToDestination = '$distanceMilesRounded miles';
     }
+  } else if (preferredDistanceUnits == DistanceUnits.british) {
+    if (distanceMetres < 403) {
+      distanceToDestination = '${(distanceMetres / 10).round() * 10}m';
+    } else {
+      final quarterMiles = (distanceMetres / 1609.344 * 4).round();
+      final miles = quarterMiles ~/ 4;
+      final fraction = quarterMiles % 4;
+      if (fraction == 0) {
+        distanceToDestination = '$miles mile${(miles == 1) ? '' : 's'}';
+      } else {
+        final fractionText = switch (fraction) {
+          1 => '¼',
+          2 => '½',
+          3 => '¾',
+          _ => '',
+        };
+        distanceToDestination = '${(miles == 0) ? '' : miles}$fractionText mile${(miles >= 1) ? 's' : ''}';
+      }
+    }
+  } else if (preferredDistanceUnits == DistanceUnits.walking) {
+    final minutes = (distanceMetres / 70).round(); // 70m/min through busy shopping area
+    distanceToDestination = '$minutes mins';
   } else if (preferredDistanceUnits == DistanceUnits.cambridge) {
     final puntLengths = (distanceMetres / 4).toStringAsFixed(0);
     distanceToDestination = '$puntLengths punts';

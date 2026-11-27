@@ -163,6 +163,7 @@ void main() {
       ];
 
       await loadSettings();
+      preferredDistanceUnits = DistanceUnits.metric;
       await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       expect(find.text('🍩 '), findsOneWidget);
