@@ -167,6 +167,10 @@ List<Map<String, dynamic>> _parseListings(String body) {
   for (var i = 0; i < mappedCells.length; i++) {
     mappedCells[i]['genericTerms'] = '';
     if ((mappedCells[i]['food'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'food ';
+    if ((mappedCells[i]['shopping'] ?? '') == 'TRUE') {
+      mappedCells[i]['genericTerms'] += 'shopping ';
+      if ((mappedCells[i]['brickAndMortar'] ?? '') == 'FALSE') mappedCells[i]['genericTerms'] += 'stalls ';
+    }
     if ((mappedCells[i]['performanceMusic'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances music buskers ';
     if ((mappedCells[i]['performanceChildrens'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances childrens kids family ';
     if ((mappedCells[i]['performanceDance'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances dance ';

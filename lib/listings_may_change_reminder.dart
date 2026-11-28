@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 
 // Third-party imports
-import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -69,20 +67,10 @@ class ListingUpdateNotifier {
     }
 
     if (now.isAfter(fairDate)) {
-      return Text.rich(TextSpan(children: [
-        const TextSpan(text: 'Thank you to everyone who came to the 2026 Fair and made it '
-            'such a huge success.\n\n'
-            'We‘ll be back in December 2027 and will be updating the app and listings '
-            'as the Fair approaches.\n\n'),
-        const TextSpan(text: 'In the meantime, we’d be grateful if you could complete our '),
-        TextSpan(text: 'feedback survey', style: const TextStyle(decoration: TextDecoration.underline), recognizer: TapGestureRecognizer()
-          ..onTap = () {
-            HapticFeedback.lightImpact();
-            context.read<UrlLauncher>().open(Uri.parse('https://tinyurl.com/3adveur9'));
-          }
-        ),
-        const TextSpan(text: '.'),
-      ]));
+      return const Text('Thank you to everyone who came to the 2026 Fair and made it '
+          'such a huge success.\n\n'
+          'We‘ll be back in December 2027 and will be updating the app and listings '
+          'as the Fair approaches.');
     }
 
     return const Text('Event details may change as the Fair approaches, but this app '

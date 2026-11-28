@@ -944,7 +944,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     final type = getCategory(listing);
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
-    bool detailsVisible = false;
+    bool detailsVisible = !navigationInProgress;
 
     Marker newMarker = Marker(
         markerId: markerId,
@@ -1504,6 +1504,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       await startLocationUpdates(destination);
     }
 
+    // Set navigation as in progress; do this now so marker doesn't have its Details open
+    navigationInProgress = true;
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
     const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
     if (id.length > aSimpleMarkerIdLen && id.substring(0, aSimpleMarkerIdLen) == aSimpleMarkerId) {
@@ -1521,10 +1523,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       }
     }
 
-    setState(() {
-      // Set navigation as in progress; do this late so cancel button isn't available before nav starts
-      navigationInProgress = true;
-    });
+    setState(() { });
   }
 
 
@@ -1727,16 +1726,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       });
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
-      Fluttertoast.showToast(
-        msg: (_isSearching)
+      showInfoToast(context, (_isSearching)
           ? 'Nearest search results are more than 500m away, so please change or cancel your search and try again.'
           : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Colors.white,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
+        isError: true
       );
       widget.cancelMapNearest?.call();
       return;
